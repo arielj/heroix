@@ -1,0 +1,114 @@
+{
+  "app_name": "0a697c1235fb4706a635cfa33f0306ec",
+  "app_title": "Stranger Things 3: The Game",
+  "app_version": "857",
+  "asset_info": {
+    "app_name": "0a697c1235fb4706a635cfa33f0306ec",
+    "asset_id": "0a697c1235fb4706a635cfa33f0306ec",
+    "build_version": "857",
+    "catalog_item_id": "57a54bda48d24db5b669bcb125fa79ab",
+    "label_name": "Live-Windows",
+    "metadata": {},
+    "namespace": "05279bd00f094731a273370b7c639f24"
+  },
+  "base_urls": [],
+  "metadata": {
+    "ageGatings": {},
+    "categories": [
+      {
+        "path": "public"
+      },
+      {
+        "path": "games"
+      },
+      {
+        "path": "applications"
+      }
+    ],
+    "creationDate": "2020-01-21T00:24:02.983Z",
+    "customAttributes": {
+      "CanRunOffline": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "CanSkipKoreanIdVerification": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "CloudIncludeList": {
+        "type": "STRING",
+        "value": "SaveGames/,PlayerData_Online.xml.bin,PlayerData_Online.xml.cyc,PlayerData_Online.xml.sig"
+      },
+      "CloudSaveFolder": {
+        "type": "STRING",
+        "value": "{AppData}/../LocalLow/BonusXP/ST3TG/"
+      },
+      "CloudSaveFolder_MAC": {
+        "type": "STRING",
+        "value": "{UserLibrary}/Application Support/com.bonusxp.fate/"
+      },
+      "FolderName": {
+        "type": "STRING",
+        "value": "StrangerThings3"
+      },
+      "MonitorPresence": {
+        "type": "STRING",
+        "value": "false"
+      },
+      "PresenceId": {
+        "type": "STRING",
+        "value": "05279bd00f094731a273370b7c639f24"
+      },
+      "RequirementsJson": {
+        "type": "STRING",
+        "value": "[]"
+      },
+      "UseAccessControl": {
+        "type": "STRING",
+        "value": "false"
+      }
+    },
+    "description": "Stranger Things 3: The Game",
+    "developer": "En Masse Entertainment",
+    "developerId": "o-56j99pafxy5hhf4ms9rthh5vxzct92",
+    "endOfSupport": false,
+    "entitlementName": "57a54bda48d24db5b669bcb125fa79ab",
+    "entitlementType": "EXECUTABLE",
+    "eulaIds": ["egstore"],
+    "id": "57a54bda48d24db5b669bcb125fa79ab",
+    "itemType": "DURABLE",
+    "keyImages": [
+      {
+        "height": 1440,
+        "md5": "e51180d2c7c28c62795c06c97c533ba5",
+        "size": 628680,
+        "type": "DieselGameBox",
+        "uploadedDate": "2020-06-17T22:17:58.289Z",
+        "url": "https://cdn1.epicgames.com/05279bd00f094731a273370b7c639f24/item/egs-strangerthings3thegame-bonusxp-s1-2560x1440-235931591-2560x1440-e51180d2c7c28c62795c06c97c533ba5.jpg",
+        "width": 2560
+      },
+      {
+        "height": 1600,
+        "md5": "a10bc3ec178f5e3e5423e8f767261a51",
+        "size": 408319,
+        "type": "DieselGameBoxTall",
+        "uploadedDate": "2020-06-17T22:18:09.495Z",
+        "url": "https://cdn1.epicgames.com/05279bd00f094731a273370b7c639f24/item/egs-strangerthings3thegame-bonusxp-s2-1200x1600-235932325-1200x1600-a10bc3ec178f5e3e5423e8f767261a51.jpg",
+        "width": 1200
+      }
+    ],
+    "lastModifiedDate": "2020-06-25T16:12:38.001Z",
+    "namespace": "05279bd00f094731a273370b7c639f24",
+    "releaseInfo": [
+      {
+        "appId": "0a697c1235fb4706a635cfa33f0306ec",
+        "dateAdded": "2020-06-11T00:00:00.000Z",
+        "id": "bc5c6933084149b18120d97a484ce84c",
+        "platform": ["Windows", "Mac"]
+      }
+    ],
+    "status": "ACTIVE",
+    "title": "Stranger Things 3: The Game",
+    "unsearchable": true
+  }
+}

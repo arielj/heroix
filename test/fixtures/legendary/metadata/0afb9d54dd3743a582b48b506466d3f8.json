@@ -1,0 +1,107 @@
+{
+  "app_name": "0afb9d54dd3743a582b48b506466d3f8",
+  "app_title": "Sherlock Holmes Crimes and Punishments",
+  "app_version": "76601.1",
+  "asset_info": {
+    "app_name": "0afb9d54dd3743a582b48b506466d3f8",
+    "asset_id": "0afb9d54dd3743a582b48b506466d3f8",
+    "build_version": "76601.1",
+    "catalog_item_id": "96fda52d68f5425baaa9aba68ec59549",
+    "label_name": "Live-Windows",
+    "metadata": {},
+    "namespace": "23f3da2016b94461a7bd7e2eb46aa0f9"
+  },
+  "base_urls": [],
+  "metadata": {
+    "ageGatings": {},
+    "categories": [
+      {
+        "path": "public"
+      },
+      {
+        "path": "games"
+      },
+      {
+        "path": "applications"
+      }
+    ],
+    "creationDate": "2020-02-12T13:19:45.757Z",
+    "customAttributes": {
+      "CanRunOffline": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "CanSkipKoreanIdVerification": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "CloudSaveFolder": {
+        "type": "STRING",
+        "value": "{UserDir}/My Games/Sherlock Holmes - Crimes and Punishments/"
+      },
+      "FolderName": {
+        "type": "STRING",
+        "value": "SHCrimesAndPunishments"
+      },
+      "MonitorPresence": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "PresenceId": {
+        "type": "STRING",
+        "value": "23f3da2016b94461a7bd7e2eb46aa0f9"
+      },
+      "RequirementsJson": {
+        "type": "STRING",
+        "value": "[]"
+      },
+      "UseAccessControl": {
+        "type": "STRING",
+        "value": "false"
+      }
+    },
+    "description": "Sherlock Holmes Crimes and Punishments",
+    "developer": "Frogwares",
+    "developerId": "o-rlw9u3sem84g2hc3ur36dqnp7wul3j",
+    "endOfSupport": false,
+    "entitlementName": "96fda52d68f5425baaa9aba68ec59549",
+    "entitlementType": "EXECUTABLE",
+    "eulaIds": ["egstore"],
+    "id": "96fda52d68f5425baaa9aba68ec59549",
+    "itemType": "DURABLE",
+    "keyImages": [
+      {
+        "height": 680,
+        "md5": "77f030ffc506bacec1fa774403894ed6",
+        "size": 127703,
+        "type": "DieselGameBoxTall",
+        "uploadedDate": "2020-03-30T21:27:05.159Z",
+        "url": "https://cdn1.epicgames.com/23f3da2016b94461a7bd7e2eb46aa0f9/item/Diesel_productv2_sherlock-holmes-crimes-and-punishments_home_EGS_SherlockHolmesCrimesandPunishments_Frogwares_S4-510x680-215de1fe53f3b88e78e7cca44ffb99b0e40fff08-510x680-77f030ffc506bacec1fa774403894ed6.jpg",
+        "width": 510
+      },
+      {
+        "height": 766,
+        "md5": "e2e6caa7637328254a763d4900ea8fa3",
+        "size": 116385,
+        "type": "DieselGameBox",
+        "uploadedDate": "2020-03-30T21:27:17.150Z",
+        "url": "https://cdn1.epicgames.com/23f3da2016b94461a7bd7e2eb46aa0f9/item/Diesel_productv2_sherlock-holmes-crimes-and-punishments_home_EGS_SherlockHolmesCrimesandPunishments_Frogwares_S3-1360x766-60bfd62d8de3b70ba9a73e41a715a2dd3b9e15a1-1360x766-e2e6caa7637328254a763d4900ea8fa3.jpg",
+        "width": 1360
+      }
+    ],
+    "lastModifiedDate": "2020-05-15T01:27:57.651Z",
+    "namespace": "23f3da2016b94461a7bd7e2eb46aa0f9",
+    "releaseInfo": [
+      {
+        "appId": "0afb9d54dd3743a582b48b506466d3f8",
+        "dateAdded": "2020-02-26T00:00:00.000Z",
+        "id": "41bdef47ffd846e1bb05187832ae9cf4",
+        "platform": ["Windows"]
+      }
+    ],
+    "selfRefundable": true,
+    "status": "ACTIVE",
+    "title": "Sherlock Holmes Crimes and Punishments",
+    "unsearchable": false
+  }
+}

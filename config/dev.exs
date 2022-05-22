@@ -63,3 +63,5 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :heroix, legendary_config_path: Path.join([System.user_home(), ".config", "legendary"])
