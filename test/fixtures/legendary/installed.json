@@ -18,5 +18,32 @@
     "save_path": null,
     "title": "Alan Wake's American Nightmare",
     "version": "1.7"
+  },
+  "Godwit": {
+    "app_name": "Godwit",
+    "base_urls": [
+      "https://epicgames-download1.akamaized.net/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default",
+      "https://download.epicgames.com/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default",
+      "https://download2.epicgames.com/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default",
+      "https://download3.epicgames.com/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default",
+      "https://download4.epicgames.com/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default",
+      "https://fastly-download.epicgames.com/Builds/Org/o-7kyv8uwtz74njnl544kbxzt5xqephw/40e32b4dc5034362a156cec0edd0f30a/default"
+    ],
+    "can_run_offline": true,
+    "egl_guid": "DEF46AC674E14152B98A4CD357291E1B",
+    "executable": "Binaries/Batman.exe",
+    "install_path": "/home/games/BatmanArkhamAsylum",
+    "install_size": 8616451048,
+    "install_tags": [],
+    "is_dlc": false,
+    "launch_parameters": "",
+    "manifest_path": null,
+    "needs_verification": false,
+    "platform": "Windows",
+    "prereq_info": null,
+    "requires_ot": false,
+    "save_path": null,
+    "title": "Batman\u2122 Arkham Asylum Game of the Year Edition",
+    "version": "1.93"
   }
 }

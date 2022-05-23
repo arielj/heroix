@@ -61,6 +61,7 @@ defmodule HeroixWeb.LibraryView do
     get_all_games()
     |> filter(search_term || "")
     |> sort(order || "asc")
+    |> installed_first()
   end
   # allow passing only one criteria
   def get_games(%{order: order}), do: get_games(%{search_term: "", order: order})
@@ -86,6 +87,18 @@ defmodule HeroixWeb.LibraryView do
       case order do
         "desc" -> title1 > title2
         _ -> title1 < title2
+      end
+    end)
+  end
+
+  defp installed_first(games) do
+    installed = Legendary.installed_games()
+    Enum.sort(games, fn (%{"app_name" => name1}, %{"app_name" => name2}) ->
+      cond do
+        installed[name1] && installed[name2] -> true
+        installed[name1] && !installed[name2] -> true
+        !installed[name1] && installed[name2] -> false
+        true -> true
       end
     end)
   end

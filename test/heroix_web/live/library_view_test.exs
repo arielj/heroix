@@ -44,40 +44,45 @@ defmodule HeroixWeb.LibraryViewTest do
 
   describe "get_games sorting" do
     test "sorts by ascending title by default" do
-      [first_game, second_game, third_game] = LibraryView.get_games()
+      [first_game, second_game, third_game, fourth_game] = LibraryView.get_games()
       assert "Alan Wake's American Nightmare" == first_game["app_title"]
-      assert "Sherlock Holmes Crimes and Punishments" == second_game["app_title"]
-      assert "Stranger Things 3: The Game" == third_game["app_title"]
+      assert "Batman\u2122 Arkham Asylum Game of the Year Edition" == second_game["app_title"]
+      assert "Sherlock Holmes Crimes and Punishments" == third_game["app_title"]
+      assert "Stranger Things 3: The Game" == fourth_game["app_title"]
     end
 
     test "sorts by descending title if specified" do
-      [first_game, second_game, third_game] = LibraryView.get_games(%{order: "desc"})
-      assert "Stranger Things 3: The Game" == first_game["app_title"]
-      assert "Sherlock Holmes Crimes and Punishments" == second_game["app_title"]
-      assert "Alan Wake's American Nightmare" == third_game["app_title"]
+      [first_game, second_game, third_game, fourth_game] = LibraryView.get_games(%{order: "desc"})
+      assert "Batman\u2122 Arkham Asylum Game of the Year Edition" == first_game["app_title"]
+      assert "Alan Wake's American Nightmare" == second_game["app_title"]
+      assert "Stranger Things 3: The Game" == third_game["app_title"]
+      assert "Sherlock Holmes Crimes and Punishments" == fourth_game["app_title"]
     end
 
     test "sorts by ascending title if specified" do
-      [first_game, second_game, third_game] = LibraryView.get_games()
+      [first_game, second_game, third_game, fourth_game] = LibraryView.get_games()
       assert "Alan Wake's American Nightmare" == first_game["app_title"]
-      assert "Sherlock Holmes Crimes and Punishments" == second_game["app_title"]
-      assert "Stranger Things 3: The Game" == third_game["app_title"]
+      assert "Batman\u2122 Arkham Asylum Game of the Year Edition" == second_game["app_title"]
+      assert "Sherlock Holmes Crimes and Punishments" == third_game["app_title"]
+      assert "Stranger Things 3: The Game" == fourth_game["app_title"]
     end
 
     test "sorts by ascending title if invalid value" do
-      [first_game, second_game, third_game] = LibraryView.get_games()
+      [first_game, second_game, third_game, fourth_game] = LibraryView.get_games()
       assert "Alan Wake's American Nightmare" == first_game["app_title"]
-      assert "Sherlock Holmes Crimes and Punishments" == second_game["app_title"]
-      assert "Stranger Things 3: The Game" == third_game["app_title"]
+      assert "Batman\u2122 Arkham Asylum Game of the Year Edition" == second_game["app_title"]
+      assert "Sherlock Holmes Crimes and Punishments" == third_game["app_title"]
+      assert "Stranger Things 3: The Game" == fourth_game["app_title"]
     end
   end
 
   describe "get_games filtering" do
     test "does not filter by default" do
-      [first_game, second_game, third_game] = LibraryView.get_games()
+      [first_game, second_game, third_game, fourth_game] = LibraryView.get_games()
       assert "Alan Wake's American Nightmare" == first_game["app_title"]
-      assert "Sherlock Holmes Crimes and Punishments" == second_game["app_title"]
-      assert "Stranger Things 3: The Game" == third_game["app_title"]
+      assert "Batman\u2122 Arkham Asylum Game of the Year Edition" == second_game["app_title"]
+      assert "Sherlock Holmes Crimes and Punishments" == third_game["app_title"]
+      assert "Stranger Things 3: The Game" == fourth_game["app_title"]
     end
 
     test "filters by lowercase term" do
