@@ -7,7 +7,7 @@ defmodule Heroix.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:gettext] ++ Mix.compilers(),
+      compilers: [:gettext] ++ Mix.compilers() ++ [:phoenix_sass],
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -45,7 +45,7 @@ defmodule Heroix.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:poison, "~> 5.0"}
+      {:phoenix_sass, "~> 0.1.0"}
     ]
   end
 

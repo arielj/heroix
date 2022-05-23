@@ -1,0 +1,38 @@
+#library {
+  #games_list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-rows: min-content min-content;
+    grid-gap: 1rem;
+
+    li {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      & > a {
+        display: grid;
+        grid-template-areas: "image" "title";
+
+        .game_image {
+          grid-area: image;
+          display: grid;
+
+          img:first-child {
+            width: 100%;
+            aspect-ratio: 1 / 1.5;
+            object-fit: cover;
+          }
+
+          img {
+            grid-column: 1;
+            grid-row: 1;
+            align-self: center;
+            justify-self: center;
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}

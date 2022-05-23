@@ -19,6 +19,7 @@ defmodule HeroixWeb.Router do
 
     get "/", PageController, :index
     live "/library", LibraryView
+    live "/library/:app_name", GameView
   end
 
   # Other scopes may use custom stacks.

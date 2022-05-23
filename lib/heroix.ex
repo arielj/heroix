@@ -7,8 +7,42 @@ defmodule Heroix do
   if it comes from the database, an external API or others.
   """
 
-  def get_json(filename, as \\ %{}) do
+  def launch_game(app_name) do
+    # System.cmd(legendary_bin(), ["launch", app_name])
+    IO.puts "Launches #{app_name}"
+    IO.puts "lengendary bin: #{legendary_bin()}"
+  end
+
+  def legendary_bin do
+    [os, bin_name] =
+      case :os.type() do
+        {:unix, :linux} -> ["linux", "legendary"]
+        {:win32, _} -> ["win32", "legendary.exe"]
+        {_, _} -> ["darwin", "legendary"]
+      end
+    Path.join([File.cwd!(), "priv", "bins", os, bin_name])
+  end
+
+  def get_json(filename) do
     with {:ok, body} <- File.read(filename),
-         {:ok, json} <- Poison.decode(body, as: as), do: {:ok, json}
+         {:ok, json} <- Jason.decode(body), do: {:ok, json}
+  end
+
+  def get_game_image(game, :tall), do: get_game_image(game, "DieselGameBoxTall", :wide)
+  def get_game_image(game, :wide), do: get_game_image(game, "DieselGameBox", :tall)
+  def get_game_image(game, :logo), do: get_game_image(game, "DieselGameBoxLogo", nil)
+  def get_game_image(game, image_type, fallback \\ nil) when is_binary(image_type) do
+    imgData =
+      game["metadata"]["keyImages"]
+      |> Enum.find(fn img -> img["type"] == image_type end)
+
+    case imgData do
+      nil ->
+        case fallback do
+          nil -> nil
+          _ -> get_game_image(game, fallback)
+        end
+      _ -> imgData["url"]
+    end
   end
 end

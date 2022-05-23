@@ -1,0 +1,22 @@
+{
+  "Condor": {
+    "app_name": "Condor",
+    "base_urls": [""],
+    "can_run_offline": true,
+    "egl_guid": "AAA",
+    "executable": "bin/start.exe",
+    "install_path": "/home/games/Alan",
+    "install_size": 22852679621,
+    "install_tags": [],
+    "is_dlc": false,
+    "launch_parameters": "",
+    "manifest_path": null,
+    "needs_verification": false,
+    "platform": "Windows",
+    "prereq_info": null,
+    "requires_ot": false,
+    "save_path": null,
+    "title": "Alan Wake's American Nightmare",
+    "version": "1.7"
+  }
+}

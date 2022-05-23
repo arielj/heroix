@@ -1,0 +1,111 @@
+{
+  "app_name": "Condor",
+  "app_title": "Alan Wake's American Nightmare",
+  "app_version": "01.03",
+  "asset_info": {
+    "app_name": "Condor",
+    "asset_id": "Condor",
+    "build_version": "01.03",
+    "catalog_item_id": "a2febf833fed4471a9185c7b80af59c3",
+    "label_name": "Live-Windows",
+    "metadata": {},
+    "namespace": "4d2a12aff0484d699b1806ab104d259b"
+  },
+  "base_urls": [],
+  "metadata": {
+    "categories": [
+      {
+        "path": "public"
+      },
+      {
+        "path": "games"
+      },
+      {
+        "path": "applications"
+      }
+    ],
+    "creationDate": "2019-07-22T19:15:19.976Z",
+    "customAttributes": {
+      "CanRunOffline": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "CanSkipKoreanIdVerification": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "FolderName": {
+        "type": "STRING",
+        "value": "AWAN"
+      },
+      "MonitorPresence": {
+        "type": "STRING",
+        "value": "true"
+      },
+      "PresenceId": {
+        "type": "STRING",
+        "value": "4d2a12aff0484d699b1806ab104d259b"
+      },
+      "RequirementsJson": {
+        "type": "STRING",
+        "value": "[]"
+      },
+      "UseAccessControl": {
+        "type": "STRING",
+        "value": "false"
+      }
+    },
+    "description": "Alan Wake's American Nightmare",
+    "developer": "Remedy Entertainment",
+    "developerId": "o-sdmmvl8pftrkwfy86bjp286kuwhnsq",
+    "endOfSupport": false,
+    "entitlementName": "a2febf833fed4471a9185c7b80af59c3",
+    "entitlementType": "EXECUTABLE",
+    "eulaIds": ["egstore"],
+    "id": "a2febf833fed4471a9185c7b80af59c3",
+    "itemType": "DURABLE",
+    "keyImages": [
+      {
+        "height": 1450,
+        "md5": "115d388941ed76dfc588f6ee7be5b06a",
+        "size": 174605,
+        "type": "DieselGameBox",
+        "uploadedDate": "2019-10-08T19:03:45.244Z",
+        "url": "https://cdn1.epicgames.com/4d2a12aff0484d699b1806ab104d259b/item/AlanWake_AN_PrimaryPromo-2580x1450-115d388941ed76dfc588f6ee7be5b06a.jpg",
+        "width": 2580
+      },
+      {
+        "height": 893,
+        "md5": "c8b2c2f751d25a6d5a59a490d1815fbc",
+        "size": 122453,
+        "type": "DieselGameBoxLogo",
+        "uploadedDate": "2019-10-08T19:03:57.011Z",
+        "url": "https://cdn1.epicgames.com/4d2a12aff0484d699b1806ab104d259b/item/Alan_Wake_American_Nightmare_logo-2000x893-c8b2c2f751d25a6d5a59a490d1815fbc.png",
+        "width": 2000
+      },
+      {
+        "height": 1420,
+        "md5": "9ffeb4efd25401f9999aa132f60c3ef3",
+        "size": 114390,
+        "type": "DieselGameBoxTall",
+        "uploadedDate": "2019-10-22T09:41:44.790Z",
+        "url": "https://cdn1.epicgames.com/4d2a12aff0484d699b1806ab104d259b/item/AlanWake_AN_Store_Portrait_Portrait-1280x1420-9ffeb4efd25401f9999aa132f60c3ef3.jpg",
+        "width": 1280
+      }
+    ],
+    "lastModifiedDate": "2019-11-19T17:02:12.156Z",
+    "namespace": "4d2a12aff0484d699b1806ab104d259b",
+    "releaseInfo": [
+      {
+        "appId": "Condor",
+        "dateAdded": "2019-10-08T00:00:00.000Z",
+        "id": "4a2de02838f043a0b492c12d882f4862",
+        "platform": ["Windows"]
+      }
+    ],
+    "selfRefundable": true,
+    "status": "ACTIVE",
+    "title": "Alan Wake's American Nightmare",
+    "unsearchable": false
+  }
+}

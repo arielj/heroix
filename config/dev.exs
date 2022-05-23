@@ -14,6 +14,7 @@ config :heroix, HeroixWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "ktj0dI/xRCuG3HYg0g/tKhcf3DlRGA0WiqSFI9KxQiVZ81ovXqN6NJaILvPEDrZO",
+  reloadable_compilers: [:gettext, :phoenix, :elixir, :phoenix_sass],
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
@@ -47,6 +48,7 @@ config :heroix, HeroixWeb.Endpoint,
 config :heroix, HeroixWeb.Endpoint,
   live_reload: [
     patterns: [
+      ~r"priv/sass/.*(sass|scss)$",
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/heroix_web/(live|views)/.*(ex)$",
@@ -65,3 +67,8 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :heroix, legendary_config_path: Path.join([System.user_home(), ".config", "legendary"])
+
+config :heroix, :phoenix_sass,
+  pattern: "sass/application.scss",
+  output_dir: "static/assets",
+  output_style: 3
