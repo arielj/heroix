@@ -14,9 +14,9 @@ defmodule HeroixWeb.LibraryView do
     ~H"""
     <a id={app_name} title={app_title} href={"/library/#{app_name}"} class={class}>
       <div class="game_image">
-        <img src={get_game_image(@game)} />
+        <img src={"/image/#{app_name}/tall"} />
         <%= if has_logo(@game) do %>
-          <img src={get_logo_image(@game)} />
+          <img src={"/image/#{app_name}/logo"} />
         <% end %>
       </div>
       <%= app_title %>
@@ -103,19 +103,19 @@ defmodule HeroixWeb.LibraryView do
     end)
   end
 
-  def get_game_image(game) do
-    "#{Heroix.get_game_image(game, :tall)}?h=300&resize=1&w=200"
-  end
+  # def get_game_image(game) do
+  #   "#{Heroix.get_game_image(game, :tall)}?h=300&resize=1&w=200"
+  # end
 
-  def get_logo_image(game) do
-    case Heroix.get_game_image(game, :logo) do
-      nil -> nil
-      url -> "#{url}?h=50&resize=1&w=100"
-    end
-  end
+  # def get_logo_image(game) do
+  #   case Heroix.get_game_image(game, "logo") do
+  #     nil -> nil
+  #     url -> "#{url}?h=50&resize=1&w=100"
+  #   end
+  # end
 
   def has_logo(game) do
-    Heroix.get_game_image(game, :logo) != nil
+    Heroix.get_game_image(game, "logo") != nil
   end
 
   def handle_event("toggle_order", _, socket) do

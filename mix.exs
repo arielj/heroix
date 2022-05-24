@@ -20,7 +20,7 @@ defmodule Heroix.MixProject do
   def application do
     [
       mod: {Heroix.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :httpoison]
     ]
   end
 
@@ -45,7 +45,8 @@ defmodule Heroix.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
-      {:phoenix_sass, "~> 0.1.0"}
+      {:phoenix_sass, "~> 0.1.0"},
+      {:httpoison, "~> 1.8"}
     ]
   end
 

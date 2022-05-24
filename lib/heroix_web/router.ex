@@ -14,10 +14,19 @@ defmodule HeroixWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :image do
+    plug :accepts, ["image/png"]
+  end
+
+  scope "/image", HeroixWeb do
+    pipe_through :image
+
+    get "/:app_name/:variant", ImagesController, :get
+  end
+
   scope "/", HeroixWeb do
     pipe_through :browser
 
-    get "/", PageController, :index
     live "/library", LibraryView
     live "/library/:app_name", GameView
   end

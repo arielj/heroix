@@ -67,6 +67,7 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :heroix, legendary_config_path: Path.join([System.user_home(), ".config", "legendary"])
+config :heroix, heroix_config_path: Path.join([System.user_home(), ".config", "heroix"])
 
 config :heroix, :phoenix_sass,
   pattern: "sass/application.scss",

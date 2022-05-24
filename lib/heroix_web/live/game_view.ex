@@ -27,18 +27,18 @@ defmodule HeroixWeb.GameView do
   end
 
   def get_game_image(game) do
-    "#{Heroix.get_game_image(game, :tall)}?h=300&resize=1&w=200"
+    "#{Heroix.get_game_image(game, "tall")}?h=300&resize=1&w=200"
   end
 
   def get_logo_image(game) do
-    case Heroix.get_game_image(game, :logo) do
+    case Heroix.get_game_image(game, "logo") do
       nil -> nil
       url -> "#{url}?h=50&resize=1&w=100"
     end
   end
 
   def has_logo(game) do
-    Heroix.get_game_image(game, :logo) != nil
+    Heroix.get_game_image(game, "logo") != nil
   end
 
   def handle_event("launch", %{}, socket) do
