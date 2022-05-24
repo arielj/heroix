@@ -31,7 +31,7 @@ defmodule Heroix do
   def get_game_image(game, "tall"), do: get_game_image(game, "DieselGameBoxTall", "wide")
   def get_game_image(game, "wide"), do: get_game_image(game, "DieselGameBox", "tall")
   def get_game_image(game, "logo"), do: get_game_image(game, "DieselGameBoxLogo", nil)
-  def get_game_image(game, image_type, fallback \\ nil) when is_binary(image_type) do
+  def get_game_image(game, image_type, fallback \\ nil) do
     imgData =
       game["metadata"]["keyImages"]
       |> Enum.find(fn img -> img["type"] == image_type end)

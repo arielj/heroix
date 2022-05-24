@@ -2,29 +2,25 @@ defmodule HeroixWeb.LibraryView do
   use HeroixWeb, :live_view
 
   alias Heroix.Legendary
+  import HeroixWeb.GameImageComponent
 
   def mount(_params, %{}, socket) do
     {:ok, assign(socket, order: "asc", search_term: "", games_list: get_games(), installed_games: Legendary.installed_games())}
   end
 
-  def game_card(assigns) do
+  defp game_card(assigns) do
     class = if assigns.installed, do: "installed", else: ""
     %{"app_name" => app_name, "app_title" => app_title} = assigns.game
 
     ~H"""
     <a id={app_name} title={app_title} href={"/library/#{app_name}"} class={class}>
-      <div class="game_image">
-        <img src={"/image/#{app_name}/tall"} />
-        <%= if has_logo(@game) do %>
-          <img src={"/image/#{app_name}/logo"} />
-        <% end %>
-      </div>
+      <.game_image game={@game} />
       <%= app_title %>
     </a>
     """
   end
 
-  def header(assigns) do
+  defp header(assigns) do
     ~H"""
     <header>
       <form phx-change="search" id="search_form">
@@ -101,21 +97,6 @@ defmodule HeroixWeb.LibraryView do
         true -> true
       end
     end)
-  end
-
-  # def get_game_image(game) do
-  #   "#{Heroix.get_game_image(game, :tall)}?h=300&resize=1&w=200"
-  # end
-
-  # def get_logo_image(game) do
-  #   case Heroix.get_game_image(game, "logo") do
-  #     nil -> nil
-  #     url -> "#{url}?h=50&resize=1&w=100"
-  #   end
-  # end
-
-  def has_logo(game) do
-    Heroix.get_game_image(game, "logo") != nil
   end
 
   def handle_event("toggle_order", _, socket) do

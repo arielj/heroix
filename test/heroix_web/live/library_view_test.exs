@@ -16,27 +16,33 @@ defmodule HeroixWeb.LibraryViewTest do
   test "lists all games", %{conn: conn} do
     {:ok, view, html} = live(conn, "/library")
     alan_wake = escape("Alan Wake's American Nightmare")
-
     sherlock = "Sherlock Holmes Crimes and Punishments"
     stranger = "Stranger Things 3: The Game"
+    batman = "Batman™ Arkham Asylum Game of the Year Edition"
+
     assert html =~ alan_wake
     assert html =~ sherlock
     assert html =~ stranger
+    assert html =~ batman
 
     html = view |> element("[id='search_form']") |> render_change(%{search: "sh"})
     refute html =~ alan_wake
     assert html =~ sherlock
     refute html =~ stranger
+    refute html =~ batman
 
     html = view |> element("[id='search_form']") |> render_change(%{search: ""})
     assert html =~ alan_wake
     assert html =~ sherlock
     assert html =~ stranger
+    assert html =~ batman
 
-    assert view |> element("a[id='0a697c1235fb4706a635cfa33f0306ec']:not(.installed)") |> has_element?()
-    assert view |> element("a[id='0afb9d54dd3743a582b48b506466d3f8']:not(.installed)") |> has_element?()
-    el = view |> element("a[id='Condor'].installed)")
-    assert el |> has_element?()
+    assert view |> element("a[title='#{sherlock}']:not(.installed)") |> has_element?()
+    assert view |> element("a[title='#{stranger}']:not(.installed)") |> has_element?()
+    assert view |> element("a[title='#{batman}'].installed)") |> has_element?()
+
+    el = view |> element("a[title=\"Alan Wake's American Nightmare\"].installed)")
+    assert el |> has_element?
 
     el |> render_click()
     assert_redirected view, "/library/Condor"
