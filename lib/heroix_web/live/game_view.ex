@@ -6,8 +6,7 @@ defmodule HeroixWeb.GameView do
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
-    installed = Legendary.installed_games()[app_name] != nil
-    {:ok, assign(socket, app_name: app_name, game: game_info, installed: installed, page_title: game_info["app_title"] )}
+    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"] )}
   end
 
   def render(assigns) do
@@ -15,7 +14,7 @@ defmodule HeroixWeb.GameView do
     <div id="game">
       <.game_image game={@game} />
       <h1><%= @game["app_title"] %></h1>
-      <%= if @installed do %>
+      <%= if @game["install_info"] != nil do %>
         <button phx-click="launch">Lunch</button>
       <% end %>
     </div>

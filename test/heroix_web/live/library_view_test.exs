@@ -13,39 +13,49 @@ defmodule HeroixWeb.LibraryViewTest do
     |> Phoenix.HTML.safe_to_string()
   end
 
-  test "lists all games", %{conn: conn} do
-    {:ok, view, html} = live(conn, "/library")
+  setup do
     alan_wake = escape("Alan Wake's American Nightmare")
     sherlock = "Sherlock Holmes Crimes and Punishments"
     stranger = "Stranger Things 3: The Game"
     batman = "Batman™ Arkham Asylum Game of the Year Edition"
 
-    assert html =~ alan_wake
-    assert html =~ sherlock
-    assert html =~ stranger
-    assert html =~ batman
+    %{games: %{alan_wake: alan_wake, batman: batman, sherlock: sherlock, stranger: stranger}}
+  end
+
+  test "lists all games and can search", %{conn: conn, games: games} do
+    {:ok, view, html} = live(conn, "/library")
+
+    assert html =~ games[:alan_wake]
+    assert html =~ games[:sherlock]
+    assert html =~ games[:stranger]
+    assert html =~ games[:batman]
 
     html = view |> element("[id='search_form']") |> render_change(%{search: "sh"})
-    refute html =~ alan_wake
-    assert html =~ sherlock
-    refute html =~ stranger
-    refute html =~ batman
+    refute html =~ games[:alan_wake]
+    assert html =~ games[:sherlock]
+    refute html =~ games[:stranger]
+    refute html =~ games[:batman]
 
     html = view |> element("[id='search_form']") |> render_change(%{search: ""})
-    assert html =~ alan_wake
-    assert html =~ sherlock
-    assert html =~ stranger
-    assert html =~ batman
+    assert html =~ games[:alan_wake]
+    assert html =~ games[:sherlock]
+    assert html =~ games[:stranger]
+    assert html =~ games[:batman]
+  end
 
-    assert view |> element("a[title='#{sherlock}']:not(.installed)") |> has_element?()
-    assert view |> element("a[title='#{stranger}']:not(.installed)") |> has_element?()
-    assert view |> element("a[title='#{batman}'].installed)") |> has_element?()
+  test "shows installed games with the correct class", %{conn: conn, games: games} do
+    {:ok, view, _} = live(conn, "/library")
+    assert view |> element("a[title='#{games[:sherlock]}']:not(.installed)") |> has_element?()
+    assert view |> element("a[title='#{games[:stranger]}']:not(.installed)") |> has_element?()
+    assert view |> element("a[title='#{games[:batman]}'].installed)") |> has_element?()
+    # use string directly here so it's not escaped, testing the `'` character
+    assert view |> element("a[title=\"Alan Wake's American Nightmare\"].installed)") |> has_element?()
+  end
 
-    el = view |> element("a[title=\"Alan Wake's American Nightmare\"].installed)")
-    assert el |> has_element?
-
-    el |> render_click()
-    assert_redirected view, "/library/Condor"
+  test "links to the game page", %{conn: conn, games: games} do
+    {:ok, view, _} = live(conn, "/library")
+    view |> element("a[title='#{games[:batman]}'].installed)") |> render_click()
+    assert_redirected view, "/library/Godwit"
   end
 
   describe "get_games sorting" do

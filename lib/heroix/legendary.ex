@@ -1,14 +1,19 @@
 defmodule Heroix.Legendary do
   def owned_games do
+    installed_info = installed_games()
+
     Path.wildcard("#{metadata_path()}/*.json")
-    |> Enum.map(fn filename -> process_metadata(filename) end)
+    |> Enum.map(fn filename -> process_metadata(filename, installed_info) end)
     |> Enum.into(%{})
   end
 
   def game_info(app_name) do
     case Heroix.get_json(game_metadata_path(app_name)) do
       {:error, :enoent} -> {:error, "Game not found"}
-      {:ok, json} -> {:ok, json}
+      {:ok, json} ->
+        %{ "app_name" => app_name} = json
+        json = Map.put(json, "install_info", installed_games()[app_name])
+        {:ok, json}
     end
   end
 
@@ -19,10 +24,11 @@ defmodule Heroix.Legendary do
     end
   end
 
-  defp process_metadata(filename) do
+  defp process_metadata(filename, installed_info) do
     case Heroix.get_json(filename) do
       {:ok, json} ->
         %{ "app_name" => app_name} = json
+        json = Map.put(json, "install_info", installed_info[app_name])
         { app_name, json }
       {:error, :enoent} -> %{}
     end

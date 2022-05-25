@@ -5,7 +5,7 @@ defmodule HeroixWeb.LibraryView do
   import HeroixWeb.GameImageComponent
 
   def mount(_params, %{}, socket) do
-    {:ok, assign(socket, order: "asc", search_term: "", games_list: get_games(), installed_games: Legendary.installed_games())}
+    {:ok, assign(socket, order: "asc", search_term: "", games_list: get_games())}
   end
 
   defp game_card(assigns) do
@@ -42,7 +42,7 @@ defmodule HeroixWeb.LibraryView do
       </div>
       <ul id="games_list">
         <%= for game <- @games_list do %>
-          <li><.game_card game={game} installed={@installed_games[game["app_name"]] != nil} /></li>
+          <li><.game_card game={game} installed={game["install_info"] != nil} /></li>
         <% end %>
       </ul>
     </section>
@@ -88,12 +88,11 @@ defmodule HeroixWeb.LibraryView do
   end
 
   defp installed_first(games) do
-    installed = Legendary.installed_games()
-    Enum.sort(games, fn (%{"app_name" => name1}, %{"app_name" => name2}) ->
+    Enum.sort(games, fn (%{"install_info" => installed1}, %{"install_info" => installed2}) ->
       cond do
-        installed[name1] && installed[name2] -> true
-        installed[name1] && !installed[name2] -> true
-        !installed[name1] && installed[name2] -> false
+        installed1 && installed2 -> true
+        installed1 && !installed2 -> true
+        !installed1 && installed2 -> false
         true -> true
       end
     end)
