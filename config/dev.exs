@@ -70,6 +70,6 @@ config :heroix, legendary_config_path: Path.join([System.user_home(), ".config",
 config :heroix, heroix_config_path: Path.join([System.user_home(), ".config", "heroix"])
 
 config :heroix, :phoenix_sass,
-  pattern: "sass/application.scss",
+  pattern: "sass/*.scss",
   output_dir: "static/assets",
   output_style: 3

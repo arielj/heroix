@@ -1,9 +1,15 @@
 #library {
+  header {
+    display: flex;
+    align-items: center;
+  }
   #games_list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     grid-template-rows: min-content min-content;
     grid-gap: 1rem;
+    padding: 0px;
+    margin: 1rem 0 0;
 
     li {
       list-style: none;
@@ -16,21 +22,6 @@
 
         .game_image {
           grid-area: image;
-          display: grid;
-
-          img:first-child {
-            width: 100%;
-            aspect-ratio: 1 / 1.5;
-            object-fit: cover;
-          }
-
-          img {
-            grid-column: 1;
-            grid-row: 1;
-            align-self: center;
-            justify-self: center;
-            display: block;
-          }
         }
       }
     }

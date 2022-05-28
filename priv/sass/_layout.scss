@@ -1,4 +1,9 @@
 body {
+  --main-bkg: #ffffff;
+  --sidebar-bkg: #1d1d1d;
+  --accent-color: #003459;
+  --alt-accent-color: #007ea7;
+  --error-color: #00171f;
   padding: 0;
   margin: 0;
   box-sizing: border-box;
@@ -6,15 +11,18 @@ body {
 
 [data-phx-main] {
   display: grid;
-  grid-template-columns: 180px 1fr;
+  grid-template-columns: min-content 1fr;
   width: 100vw;
   height: 100vh;
 
   aside {
     display: flex;
     flex-direction: column;
+    padding: 1rem;
   }
   main {
     overflow: auto;
+    background: var(--main-bkg);
+    padding: 1rem;
   }
 }

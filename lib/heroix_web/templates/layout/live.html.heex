@@ -1,5 +1,10 @@
 <aside>
-  <%= link gettext("Library"), to: "/library" %>
+  <%= link to: "/library" do %>
+    <.font_icon icon="library" /> <%= gettext("Library") %>
+  <% end  %>
+  <%= link to: "/settings" do %>
+    <.font_icon icon="ui-settings" /> <%= gettext("Settings") %>
+  <% end  %>
 </aside>
 <main class="container">
   <p class="alert alert-info" role="alert"

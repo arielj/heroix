@@ -1,0 +1,19 @@
+aside {
+  background: var(--sidebar-bkg);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: max-content;
+  i {
+    font-size: 2rem;
+  }
+  a {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-inline-end: 3rem;
+  }
+}

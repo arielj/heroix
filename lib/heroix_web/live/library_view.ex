@@ -24,11 +24,14 @@ defmodule HeroixWeb.LibraryView do
     ~H"""
     <header>
       <form phx-change="search" id="search_form">
-        <div class="input-field">
-          <input name="search" value={@search_term} />
-        </div>
+      <div class="input-field">
+      <input name="search" value={@search_term} />
+      </div>
       </form>
       <span class="total">Total: <%= length(@games_list) %></span>
+      <div class="filters">
+        <button phx-click="toggle_order">Toggle order</button>
+      </div>
     </header>
     """
   end
@@ -37,9 +40,6 @@ defmodule HeroixWeb.LibraryView do
     ~H"""
     <section id="library">
       <.header games_list={@games_list} search_term={@search_term} />
-      <div class="filters">
-        <button phx-click="toggle_order">Toggle order</button>
-      </div>
       <ul id="games_list">
         <%= for game <- @games_list do %>
           <li><.game_card game={game} installed={game["install_info"] != nil} /></li>

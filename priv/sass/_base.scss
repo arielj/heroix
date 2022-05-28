@@ -1,0 +1,13 @@
+body {
+  background-color: var(--main-bkg);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+  &:hover,
+  &:focus {
+    color: var(--alt-accent-color);
+  }
+}

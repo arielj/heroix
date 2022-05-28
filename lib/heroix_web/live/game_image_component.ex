@@ -5,9 +5,9 @@ defmodule HeroixWeb.GameImageComponent do
     app_name = assigns.game["app_name"]
     ~H"""
     <div class="game_image">
-      <img src={"/image/#{app_name}/tall"} />
+      <img src={"/image/#{app_name}/tall"} class="cover" />
       <%= if has_logo(@game) do %>
-        <img src={"/image/#{app_name}/logo"} />
+        <img src={"/image/#{app_name}/logo"} class="logo" />
       <% end %>
     </div>
     """
