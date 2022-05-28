@@ -30,6 +30,7 @@ defmodule HeroixWeb.Router do
     live "/", LibraryView
     live "/library", LibraryView
     live "/library/:app_name", GameView
+    live "/settings", SettingsView
   end
 
   # Other scopes may use custom stacks.

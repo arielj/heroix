@@ -2,6 +2,20 @@
   header {
     display: flex;
     align-items: center;
+    .input-field {
+      display: grid;
+      input,
+      button {
+        grid-column: 1;
+        grid-row: 1;
+      }
+      button {
+        justify-self: flex-end;
+        background: none;
+        border: none;
+        cursor: pointer;
+      }
+    }
   }
   #games_list {
     display: grid;

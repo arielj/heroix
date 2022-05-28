@@ -39,7 +39,11 @@ defmodule Heroix do
 
   def get_json(filename) do
     with {:ok, body} <- File.read(filename),
-         {:ok, json} <- Jason.decode(body), do: {:ok, json}
+         {:ok, json} <- Jason.decode(body) do
+      {:ok, json}
+    else
+      err -> {:error, err}
+    end
   end
 
   def get_game_image(game, "tall"), do: get_game_image(game, "DieselGameBoxTall", "wide")

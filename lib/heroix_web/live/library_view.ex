@@ -24,9 +24,12 @@ defmodule HeroixWeb.LibraryView do
     ~H"""
     <header>
       <form phx-change="search" id="search_form">
-      <div class="input-field">
-      <input name="search" value={@search_term} />
-      </div>
+        <div class="input-field">
+          <input name="search" value={@search_term} />
+          <%= if @search_term != "" do %>
+            <button type="button" phx-click="clear-search">X</button>
+          <% end %>
+        </div>
       </form>
       <span class="total">Total: <%= length(@games_list) %></span>
       <div class="filters">
@@ -114,5 +117,11 @@ defmodule HeroixWeb.LibraryView do
     order = socket.assigns.order
 
     {:noreply, assign(socket, search_term: search, games_list: get_games(search, order))}
+  end
+
+  def handle_event("clear-search", _, socket) do
+    order = socket.assigns.order
+
+    {:noreply, assign(socket, search_term: "", games_list: get_games("", order))}
   end
 end

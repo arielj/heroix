@@ -1,4 +1,4 @@
-defmodule GameRunner do
+defmodule Heroix.GameRunner do
   use GenServer
   require Logger
 
