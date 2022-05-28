@@ -8,11 +8,11 @@ defmodule Heroix do
   """
 
   def launch_game(app_name) do
-    GameRunner.start_link(app_name, name: RunningGame)
+    GenServer.cast(GameRunner, {:launch, app_name})
   end
 
   def stop_game() do
-    GenServer.call(RunningGame, :stop)
+    GenServer.cast(GameRunner, :stop)
   end
 
   # def install_game(app_name) do

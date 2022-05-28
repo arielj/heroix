@@ -13,7 +13,8 @@ defmodule Heroix.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Heroix.PubSub},
       # Start the Endpoint (http/https)
-      HeroixWeb.Endpoint
+      HeroixWeb.Endpoint,
+      {GameRunner, name: GameRunner}
       # Start a worker by calling: Heroix.Worker.start_link(arg)
       # {Heroix.Worker, arg}
     ]

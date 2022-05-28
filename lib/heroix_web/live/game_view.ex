@@ -5,10 +5,19 @@ defmodule HeroixWeb.GameView do
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
 
+  @topic "game_runner"
+
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
     # IO.inspect(game_info)
-    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"] )}
+
+    # check if it's running
+    game_running = GenServer.call(GameRunner, :game_running)
+
+    # subscribe to game runner updates
+    HeroixWeb.Endpoint.subscribe(@topic)
+
+    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"], game_running: game_running )}
   end
 
   defp datetime(value) do
@@ -52,14 +61,24 @@ defmodule HeroixWeb.GameView do
         <.game_image game={@game} />
         <div class="actions">
           <%= if @game["install_info"] != nil do %>
-            <button phx-click="launch">
-              <.font_icon icon="play-alt-1" />
-              Lunch
-            </button>
-            <button phx-click="stop">
-              <.font_icon icon="stop" />
-              Stop
-            </button>
+            <%= if @game_running == @game["app_name"] do %>
+              <button phx-click="stop">
+                <.font_icon icon="stop" />
+                Stop
+              </button>
+            <% else %>
+              <%= if @game_running == nil do %>
+                <button phx-click="launch">
+                  <.font_icon icon="play-alt-1" />
+                  Lunch
+                </button>
+              <% else %>
+                <p>
+                  <a href={"/library/#{@game_running}"}>Another game</a>
+                  is currently running
+                </p>
+              <% end %>
+            <% end %>
             <button phx-click="uninstall">
               <.font_icon icon="database-remove" />
               Uninstall
@@ -89,5 +108,13 @@ defmodule HeroixWeb.GameView do
   def handle_event("stop", %{}, socket) do
     Heroix.stop_game()
     {:noreply, socket}
+  end
+
+  def handle_info(%{event: "game_launched", payload: %{app_name: app_name}}, socket) do
+    {:noreply, assign(socket, game_running: app_name)}
+  end
+
+  def handle_info(%{event: "game_stopped"}, socket) do
+    {:noreply, assign(socket, game_running: nil)}
   end
 end
