@@ -56,6 +56,10 @@ defmodule HeroixWeb.GameView do
               <.font_icon icon="play-alt-1" />
               Lunch
             </button>
+            <button phx-click="stop">
+              <.font_icon icon="stop" />
+              Stop
+            </button>
             <button phx-click="uninstall">
               <.font_icon icon="database-remove" />
               Uninstall
@@ -79,6 +83,11 @@ defmodule HeroixWeb.GameView do
 
   def handle_event("launch", %{}, socket) do
     Heroix.launch_game(socket.assigns.app_name)
+    {:noreply, socket}
+  end
+
+  def handle_event("stop", %{}, socket) do
+    Heroix.stop_game()
     {:noreply, socket}
   end
 end

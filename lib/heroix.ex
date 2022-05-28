@@ -8,8 +8,22 @@ defmodule Heroix do
   """
 
   def launch_game(app_name) do
-    # System.cmd(legendary_bin(), ["launch", app_name])
-    IO.puts "Launches #{app_name}"
+    GameRunner.start_link(app_name, name: RunningGame)
+  end
+
+  def stop_game() do
+    GenServer.call(RunningGame, :stop)
+  end
+
+  # def install_game(app_name) do
+  #   System.cmd(legendary_bin(), ["install", app_name])
+  #   IO.puts "Installs #{app_name}"
+  #   IO.puts "lengendary bin: #{legendary_bin()}"
+  # end
+
+  def uninstall_game(app_name) do
+    # System.cmd(legendary_bin(), ["uninstall", app_name])
+    IO.puts "Unnstalls #{app_name}"
     IO.puts "lengendary bin: #{legendary_bin()}"
   end
 

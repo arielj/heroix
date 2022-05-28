@@ -46,7 +46,8 @@ defmodule Heroix.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.5"},
       {:phoenix_sass, "~> 0.1.0"},
-      {:httpoison, "~> 1.8"}
+      {:httpoison, "~> 1.8"},
+      {:erlexec, "~> 1.0"}
     ]
   end
 
