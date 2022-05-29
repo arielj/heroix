@@ -24,6 +24,16 @@ defmodule Heroix.Legendary do
     end
   end
 
+  def bin_path() do
+    [os, bin_name] =
+      case :os.type() do
+        {:unix, :linux} -> ["linux", "legendary"]
+        {:win32, _} -> ["win32", "legendary.exe"]
+        {_, _} -> ["darwin", "legendary"]
+      end
+    Path.join([File.cwd!(), "priv", "bins", os, bin_name])
+  end
+
   defp process_metadata(filename, installed_info) do
     case Heroix.get_json(filename) do
       {:ok, json} ->

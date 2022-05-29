@@ -2,22 +2,23 @@ defmodule HeroixWeb.GameView do
   use HeroixWeb, :live_view
 
   alias Heroix.Legendary
+  alias Heroix.GameRunner
+  alias Heroix.GameInstaller
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
 
-  @topic "game_runner"
+  @runner_topic "game_runner"
+  @installer_topic "game_installer"
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
     # IO.inspect(game_info)
 
-    # check if it's running
-    game_running = GenServer.call(GameRunner, :game_running)
-
     # subscribe to game runner updates
-    HeroixWeb.Endpoint.subscribe(@topic)
+    HeroixWeb.Endpoint.subscribe(@runner_topic)
+    HeroixWeb.Endpoint.subscribe(@installer_topic)
 
-    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"], game_running: game_running )}
+    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"], game_running: GameRunner.running_game(), installing: GameInstaller.installing, install_queue: GameInstaller.queue )}
   end
 
   defp datetime(value) do
@@ -35,21 +36,29 @@ defmodule HeroixWeb.GameView do
   def info(assigns) do
     install_info = assigns.game["install_info"]
     metadata = assigns.game["metadata"]
+    release_date = hd(metadata["releaseInfo"])["dateAdded"]
+    last_update_at = metadata["lastModifiedDate"]
 
     ~H"""
     <dl class="info">
       <dt>Version</dt>
-      <dd><%= @game["app_version"] %></dd>
-      <dt>Install Path</dt>
-      <dd><%= install_info["install_path"] %></dd>
-      <dt>Size in Disk</dt>
-      <dd><%= install_info["install_size"] %></dd>
+      <dd><%= @game["app_version"] || "Unknown" %></dd>
+      <%= if install_info do %>
+        <dt>Install Path</dt>
+        <dd><%= install_info["install_path"] %></dd>
+        <dt>Size in Disk</dt>
+        <dd><%= Heroix.bytes_to_human(install_info["install_size"]) %></dd>
+      <% end %>
       <dt>Developer</dt>
       <dd><%= metadata["developer"] %></dd>
-      <dt>Release Date</dt>
-      <dd><%= date(List.first(metadata["releaseInfo"])["dateAdded"]) %></dd>
-      <dt>Last Updated At</dt>
-      <dd><%= datetime(metadata["lastModifiedDate"]) %></dd>
+      <%= if release_date do %>
+        <dt>Release Date</dt>
+        <dd><%= date(release_date) %></dd>
+      <% end %>
+      <%= if last_update_at do %>
+        <dt>Last Updated At</dt>
+        <dd><%= datetime(last_update_at) %></dd>
+      <% end %>
     </dl>
     """
   end
@@ -84,10 +93,18 @@ defmodule HeroixWeb.GameView do
               Uninstall
             </button>
           <% else %>
-            <button phx-click="install">
-              <.font_icon icon="database-add" />
-              Install
-            </button>
+            <%= if @installing == @game["app_name"] do %>
+              Installing...
+            <% else %>
+              <%= if Enum.member?(@install_queue, @game["app_name"]) do %>
+                In install queue
+              <% else %>
+                <button phx-click="install">
+                  <.font_icon icon="database-add" />
+                  Install
+                </button>
+              <% end %>
+            <% end %>
           <% end %>
         </div>
       </div>
@@ -101,20 +118,58 @@ defmodule HeroixWeb.GameView do
   end
 
   def handle_event("launch", %{}, socket) do
-    Heroix.launch_game(socket.assigns.app_name)
+    GameRunner.launch_game(socket.assigns.app_name)
     {:noreply, socket}
   end
 
   def handle_event("stop", %{}, socket) do
-    Heroix.stop_game()
+    GameRunner.stop_game()
     {:noreply, socket}
   end
 
+  def handle_event("install", %{}, socket) do
+    GameInstaller.install_game(socket.assigns.app_name)
+    {:noreply, socket}
+  end
+
+  def handle_event("uninstall", %{}, socket) do
+    GameInstaller.uninstall_game(socket.assigns.app_name)
+    {:noreply, socket}
+  end
+
+  # handle GameRunner broadcasted events
   def handle_info(%{event: "game_launched", payload: %{app_name: app_name}}, socket) do
     {:noreply, assign(socket, game_running: app_name)}
   end
 
   def handle_info(%{event: "game_stopped"}, socket) do
     {:noreply, assign(socket, game_running: nil)}
+  end
+
+  # handle GameInstaller broadcasted events
+  def handle_info(%{event: "game_installed", payload: %{app_name: app_name}}, socket) do
+    if app_name == socket.assigns.app_name do
+      {:ok, game_info} = Legendary.game_info(app_name)
+      {:noreply, assign(socket, game: game_info, installing: GameInstaller.installing, install_queue: GameInstaller.queue)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "installing_game"}, socket) do
+    {:noreply, assign(socket, installing: GameInstaller.installing, install_queue: GameInstaller.queue)}
+  end
+
+  def handle_info(%{event: "game_uninstalled", payload: %{app_name: app_name}}, socket) do
+    if app_name == socket.assigns.app_name do
+      {:ok, game_info} = Legendary.game_info(app_name)
+      {:noreply, assign(socket, game: game_info)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "uninstalling_game"}, socket) do
+    {:noreply, socket}
   end
 end

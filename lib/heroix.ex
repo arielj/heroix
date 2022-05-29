@@ -7,42 +7,12 @@ defmodule Heroix do
   if it comes from the database, an external API or others.
   """
 
-  def launch_game(app_name) do
-    GenServer.cast(GameRunner, {:launch, app_name})
-  end
-
-  def stop_game() do
-    GenServer.cast(GameRunner, :stop)
-  end
-
-  # def install_game(app_name) do
-  #   System.cmd(legendary_bin(), ["install", app_name])
-  #   IO.puts "Installs #{app_name}"
-  #   IO.puts "lengendary bin: #{legendary_bin()}"
-  # end
-
-  def uninstall_game(app_name) do
-    # System.cmd(legendary_bin(), ["uninstall", app_name])
-    IO.puts "Unnstalls #{app_name}"
-    IO.puts "lengendary bin: #{legendary_bin()}"
-  end
-
-  def legendary_bin do
-    [os, bin_name] =
-      case :os.type() do
-        {:unix, :linux} -> ["linux", "legendary"]
-        {:win32, _} -> ["win32", "legendary.exe"]
-        {_, _} -> ["darwin", "legendary"]
-      end
-    Path.join([File.cwd!(), "priv", "bins", os, bin_name])
-  end
-
   def get_json(filename) do
     with {:ok, body} <- File.read(filename),
          {:ok, json} <- Jason.decode(body) do
       {:ok, json}
     else
-      err -> {:error, err}
+      {:error, err} -> {:error, err}
     end
   end
 
@@ -62,5 +32,23 @@ defmodule Heroix do
         end
       _ -> imgData["url"]
     end
+  end
+
+  @bytes_in_kilo 1024
+  @bytes_in_mega 1024 * 1024
+  @bytes_in_giga 1024 * 1024 * 1024
+  def bytes_to_human(value) do
+    [value, unit] =
+      cond do
+        value > @bytes_in_giga ->
+          [value / @bytes_in_giga, "GB"]
+        value > @bytes_in_mega ->
+          [value / @bytes_in_mega, "MB"]
+        value > @bytes_in_kilo ->
+          [value / @bytes_in_kilo, "KB"]
+        true -> [value, "B"]
+      end
+
+    "#{Float.round(value, 2)}#{unit}"
   end
 end

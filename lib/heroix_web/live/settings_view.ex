@@ -9,7 +9,7 @@ defmodule HeroixWeb.SettingsView do
   def mount(_, _, socket) do
     settings = GenServer.call(Settings, :global)
 
-    {:ok, assign(socket, settings: settings )}
+    {:ok, assign(socket, settings: settings, page_title: "Global settings" )}
   end
 
   def render(assigns) do

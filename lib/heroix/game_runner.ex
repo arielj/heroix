@@ -2,7 +2,21 @@ defmodule Heroix.GameRunner do
   use GenServer
   require Logger
 
+  alias Heroix.Legendary
+
   @topic "game_runner"
+
+  def running_game() do
+    GenServer.call(GameRunner, :game_running)
+  end
+
+  def launch_game(app_name) do
+    GenServer.cast(GameRunner, {:launch, app_name})
+  end
+
+  def stop_game() do
+    GenServer.cast(GameRunner, :stop)
+  end
 
   def start_link(options) do
     log "GenServer starting"
@@ -94,7 +108,7 @@ defmodule Heroix.GameRunner do
 
   defp initial_state() do
     %{
-      path: Heroix.legendary_bin(),
+      path: Legendary.bin_path(),
       app_name: nil,
       args: [],
       game_pid: nil,
