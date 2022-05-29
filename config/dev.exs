@@ -49,7 +49,7 @@ config :heroix, HeroixWeb.Endpoint,
   live_reload: [
     patterns: [
       ~r"priv/sass/.*(sass|scss)$",
-      ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"priv/static/.*(js|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
       ~r"lib/heroix_web/(live|views)/.*(ex)$",
       ~r"lib/heroix_web/templates/.*(eex)$"
