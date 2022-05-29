@@ -5,12 +5,12 @@ defmodule Heroix.Settings do
   # @pubsub_topic "settings"
 
   def start_link(options) do
-    log "GenServer starting"
+    log("GenServer starting")
     GenServer.start_link(__MODULE__, [], options)
   end
 
   def init([]) do
-    log "GenServer started"
+    log("GenServer started")
 
     state = initial_state()
     global = Map.merge(state.global, read_global_settings())
@@ -23,11 +23,15 @@ defmodule Heroix.Settings do
     {:reply, global_settings, state}
   end
 
-  def handle_call({:set_global, key, value, save: save}, _from, state = %{global: global_settings}) do
+  def handle_call(
+        {:set_global, key, value, save: save},
+        _from,
+        state = %{global: global_settings}
+      ) do
     new_global = Map.put(global_settings, key, value)
     state = Map.put(state, :global, new_global)
 
-    if (save), do: write_global_settings(new_global)
+    if save, do: write_global_settings(new_global)
 
     {:reply, new_global, state}
   end
@@ -39,12 +43,12 @@ defmodule Heroix.Settings do
   end
 
   def handle_info(msg, state) do
-    log "Unhandled message: #{inspect msg}"
+    log("Unhandled message: #{inspect(msg)}")
     {:noreply, state}
   end
 
   def log(msg) do
-    Logger.info "[Settings] #{String.trim(msg)}"
+    Logger.info("[Settings] #{String.trim(msg)}")
   end
 
   defp initial_state() do

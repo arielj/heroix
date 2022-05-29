@@ -18,16 +18,25 @@ defmodule HeroixWeb.GameView do
     HeroixWeb.Endpoint.subscribe(@runner_topic)
     HeroixWeb.Endpoint.subscribe(@installer_topic)
 
-    {:ok, assign(socket, app_name: app_name, game: game_info, page_title: game_info["app_title"], game_running: GameRunner.running_game(), installing: GameInstaller.installing, install_queue: GameInstaller.queue )}
+    {:ok,
+     assign(socket,
+       app_name: app_name,
+       game: game_info,
+       page_title: game_info["app_title"],
+       game_running: GameRunner.running_game(),
+       installing: GameInstaller.installing(),
+       install_queue: GameInstaller.queue()
+     )}
   end
 
   defp datetime(value) do
-    {:ok, dt, _ } = DateTime.from_iso8601(value)
+    {:ok, dt, _} = DateTime.from_iso8601(value)
     Calendar.strftime(dt, "%Y-%m-%d %I:%M:%S")
   end
 
   defp date(value) do
-    {:ok, dt, _ } = DateTime.from_iso8601(value)
+    {:ok, dt, _} = DateTime.from_iso8601(value)
+
     dt
     |> DateTime.to_date()
     |> Calendar.strftime("%Y-%m-%d")
@@ -150,14 +159,21 @@ defmodule HeroixWeb.GameView do
   def handle_info(%{event: "game_installed", payload: %{app_name: app_name}}, socket) do
     if app_name == socket.assigns.app_name do
       {:ok, game_info} = Legendary.game_info(app_name)
-      {:noreply, assign(socket, game: game_info, installing: GameInstaller.installing, install_queue: GameInstaller.queue)}
+
+      {:noreply,
+       assign(socket,
+         game: game_info,
+         installing: GameInstaller.installing(),
+         install_queue: GameInstaller.queue()
+       )}
     else
       {:noreply, socket}
     end
   end
 
   def handle_info(%{event: "installing_game"}, socket) do
-    {:noreply, assign(socket, installing: GameInstaller.installing, install_queue: GameInstaller.queue)}
+    {:noreply,
+     assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}
   end
 
   def handle_info(%{event: "game_uninstalled", payload: %{app_name: app_name}}, socket) do

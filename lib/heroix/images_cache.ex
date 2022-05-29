@@ -1,5 +1,4 @@
 defmodule Heroix.ImagesCache do
-
   def get(app_name, variant) do
     case Heroix.Legendary.game_info(app_name) do
       {:ok, game_info} ->
@@ -7,7 +6,9 @@ defmodule Heroix.ImagesCache do
           nil -> nil
           url -> local_path_for(url, app_name, variant)
         end
-      {:error, _} -> nil
+
+      {:error, _} ->
+        nil
     end
   end
 
@@ -28,11 +29,13 @@ defmodule Heroix.ImagesCache do
   end
 
   defp filepath(app_name, variant, extension) do
+    # TODO: kinda ugly to check env here
     filename =
-      case Application.get_env(:your_app, :env) do # TODO: kinda ugly to check env here
+      case Application.get_env(:your_app, :env) do
         :test -> "test-image.png"
         _ -> "#{app_name}-#{variant}#{extension}"
       end
+
     Path.join([images_cache_path(), filename])
   end
 

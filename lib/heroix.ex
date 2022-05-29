@@ -19,6 +19,7 @@ defmodule Heroix do
   def get_game_image(game, "tall"), do: get_game_image(game, "DieselGameBoxTall", "wide")
   def get_game_image(game, "wide"), do: get_game_image(game, "DieselGameBox", "tall")
   def get_game_image(game, "logo"), do: get_game_image(game, "DieselGameBoxLogo", nil)
+
   def get_game_image(game, image_type, fallback \\ nil) do
     imgData =
       game["metadata"]["keyImages"]
@@ -30,7 +31,9 @@ defmodule Heroix do
           nil -> nil
           _ -> get_game_image(game, fallback)
         end
-      _ -> imgData["url"]
+
+      _ ->
+        imgData["url"]
     end
   end
 
@@ -42,11 +45,15 @@ defmodule Heroix do
       cond do
         value > @bytes_in_giga ->
           [value / @bytes_in_giga, "GB"]
+
         value > @bytes_in_mega ->
           [value / @bytes_in_mega, "MB"]
+
         value > @bytes_in_kilo ->
           [value / @bytes_in_kilo, "KB"]
-        true -> [value, "B"]
+
+        true ->
+          [value, "B"]
       end
 
     "#{Float.round(value, 2)}#{unit}"

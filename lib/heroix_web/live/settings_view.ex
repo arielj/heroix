@@ -9,11 +9,12 @@ defmodule HeroixWeb.SettingsView do
   def mount(_, _, socket) do
     settings = GenServer.call(Settings, :global)
 
-    {:ok, assign(socket, settings: settings, page_title: "Global settings" )}
+    {:ok, assign(socket, settings: settings, page_title: "Global settings")}
   end
 
   def render(assigns) do
     langs = @langs
+
     ~H"""
     <div id="global_settings">
       <form phx-change="change">
@@ -39,7 +40,13 @@ defmodule HeroixWeb.SettingsView do
   def handle_event("change", data, socket) do
     key = List.first(data["_target"])
     value = data[key]
-    settings = GenServer.call(Settings, {:set_global, key, value, save: Enum.member?(@save_on_change, key)})
+
+    settings =
+      GenServer.call(
+        Settings,
+        {:set_global, key, value, save: Enum.member?(@save_on_change, key)}
+      )
+
     {:noreply, assign(socket, :settings, settings)}
   end
 

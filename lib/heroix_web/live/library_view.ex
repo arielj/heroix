@@ -56,15 +56,20 @@ defmodule HeroixWeb.LibraryView do
   def get_games(), do: get_games(%{search_term: "", order: "asc"})
   # allow 2 positional args
   def get_games(search_term, order), do: get_games(%{search_term: search_term, order: order})
+
   def get_games(%{search_term: search_term, order: order}) do
     get_all_games()
     |> filter(search_term || "")
     |> sort(order || "asc")
     |> installed_first()
   end
+
   # allow passing only one criteria
   def get_games(%{order: order}), do: get_games(%{search_term: "", order: order})
-  def get_games(%{search_term: search_term}), do: get_games(%{search_term: search_term, order: "asc"})
+
+  def get_games(%{search_term: search_term}) do
+    get_games(%{search_term: search_term, order: "asc"})
+  end
 
   defp get_all_games() do
     Legendary.owned_games()
@@ -78,11 +83,13 @@ defmodule HeroixWeb.LibraryView do
       |> String.downcase()
 
     games
-    |> Enum.filter(fn %{"app_title" => app_title} -> String.contains?(String.downcase(app_title), search_term) end)
+    |> Enum.filter(fn %{"app_title" => app_title} ->
+      String.contains?(String.downcase(app_title), search_term)
+    end)
   end
 
   defp sort(games, order) do
-    Enum.sort(games, fn (%{"app_title" => title1}, %{"app_title" => title2}) ->
+    Enum.sort(games, fn %{"app_title" => title1}, %{"app_title" => title2} ->
       case order do
         "desc" -> title1 > title2
         _ -> title1 < title2
@@ -91,7 +98,7 @@ defmodule HeroixWeb.LibraryView do
   end
 
   defp installed_first(games) do
-    Enum.sort(games, fn (%{"install_info" => installed1}, %{"install_info" => installed2}) ->
+    Enum.sort(games, fn %{"install_info" => installed1}, %{"install_info" => installed2} ->
       cond do
         installed1 && installed2 -> true
         installed1 && !installed2 -> true

@@ -14,12 +14,12 @@ defmodule Heroix.GameInstaller do
   def queue(), do: GenServer.call(GameInstaller, :queue)
 
   def start_link(options) do
-    log "GenServer starting"
+    log("GenServer starting")
     GenServer.start_link(__MODULE__, [], options)
   end
 
   def init([]) do
-    log "GenServer started"
+    log("GenServer started")
     # :exec.start_link([])
     :exec.start_link([:debug])
     {:ok, initial_state()}
@@ -36,7 +36,7 @@ defmodule Heroix.GameInstaller do
 
   # if something is being installed, enqueue app_name
   def handle_cast({:install, app_name}, state = %{installing: installing_app_name}) do
-    log "Installation in progress (#{installing_app_name}), enqueuing."
+    log("Installation in progress (#{installing_app_name}), enqueuing.")
     state = Map.put(state, :queue, state.queue ++ [app_name])
     {:noreply, state}
   end
@@ -50,54 +50,63 @@ defmodule Heroix.GameInstaller do
   end
 
   def handle_info({:stderr, _pid, msg}, state) do
-    log "[Legendary] #{msg}"
+    log("[Legendary] #{msg}")
     # TODO: process msg, broadcast progress
     {:noreply, state}
   end
 
   def handle_info({:stdout, _pid, msg}, state) do
-    log "[Legendary] #{msg}"
+    log("[Legendary] #{msg}")
     # TODO: process msg, broadcast progress
     {:noreply, state}
   end
 
   # when legendary command ends
   def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
-    %{installing: installing_app_name, queue: queue, installing_pid: installing_pid, uninstalling_pid: uninstalling_pid, uninstalling: uninstalling_app_name} = state
+    %{
+      installing: installing_app_name,
+      queue: queue,
+      installing_pid: installing_pid,
+      uninstalling_pid: uninstalling_pid,
+      uninstalling: uninstalling_app_name
+    } = state
 
     # check if pid matches an installation or uninstallation pid
     cond do
       pid == installing_pid ->
-        log "Installation completed"
+        log("Installation completed")
 
         # remove game from queue
         new_queue = Enum.reject(queue, fn name -> name == installing_app_name end)
 
         # update state
-        new_state = Map.merge(state, %{
-          queue: new_queue,
-          installing_pid: nil,
-          installing: nil,
-        })
+        new_state =
+          Map.merge(state, %{
+            queue: new_queue,
+            installing_pid: nil,
+            installing: nil
+          })
 
         # noreply and then broadcast installed
         {:noreply, new_state, {:continue, {:broadcast_installed, installing_app_name}}}
+
       pid == uninstalling_pid ->
-        log "Uninstall completed"
+        log("Uninstall completed")
 
         # update state
         new_state = Map.merge(state, %{uninstalling_pid: nil, uninstalling: nil})
 
         # noreply and then broadcast uninstalled
         {:noreply, new_state, {:continue, {:broadcast_uninstalled, uninstalling_app_name}}}
+
       true ->
-        log "Unknown process DOWN #{inspect msg}"
+        log("Unknown process DOWN #{inspect(msg)}")
         {:noreply, state}
     end
   end
 
   def handle_info(msg, state) do
-    log "Unhandled message: #{inspect msg}"
+    log("Unhandled message: #{inspect(msg)}")
     {:noreply, state}
   end
 
@@ -115,7 +124,7 @@ defmodule Heroix.GameInstaller do
 
   # check if queue has something to install
   def handle_continue(:check_queue, state = %{queue: queue}) do
-    log "Checking install queue"
+    log("Checking install queue")
     # trigger installation of next game in queue
     if length(queue) > 0 do
       install_game(hd(queue))
@@ -125,11 +134,14 @@ defmodule Heroix.GameInstaller do
   end
 
   # return some state data
-  def handle_call(:installing, _from, state = %{installing: app_name}), do: {:reply, app_name, state}
+  def handle_call(:installing, _from, state = %{installing: app_name}) do
+    {:reply, app_name, state}
+  end
+
   def handle_call(:queue, _from, state = %{queue: queue}), do: {:reply, queue, state}
 
   defp log(msg) do
-    Logger.info "[GameInstaller] #{String.trim(msg)}"
+    Logger.info("[GameInstaller] #{String.trim(msg)}")
   end
 
   defp initial_state() do
@@ -139,7 +151,7 @@ defmodule Heroix.GameInstaller do
       installing_pid: nil,
       uninstalling: nil,
       uninstalling_pid: nil,
-      queue: [],
+      queue: []
     }
   end
 
@@ -151,10 +163,10 @@ defmodule Heroix.GameInstaller do
   # run legendary, monitor and return pid
   defp install(app_name, %{path: path}) do
     args = ["-y", "install", app_name]
-    log "Installing: #{app_name}"
+    log("Installing: #{app_name}")
 
     {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
-    log "Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})"
+    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid
   end
@@ -162,10 +174,10 @@ defmodule Heroix.GameInstaller do
   # run legendary, monitor and return pid
   defp uninstall(app_name, %{path: path}) do
     args = ["-y", "uninstall", app_name]
-    log "Uninstalling: #{app_name}"
+    log("Uninstalling: #{app_name}")
 
     {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
-    log "Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})"
+    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid
   end

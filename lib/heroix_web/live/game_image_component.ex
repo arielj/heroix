@@ -3,6 +3,7 @@ defmodule HeroixWeb.GameImageComponent do
 
   def game_image(assigns) do
     app_name = assigns.game["app_name"]
+
     ~H"""
     <div class="game_image">
       <img src={"/image/#{app_name}/tall"} class="cover" />

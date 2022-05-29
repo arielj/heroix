@@ -9,9 +9,11 @@ defmodule Heroix.Legendary do
 
   def game_info(app_name) do
     case Heroix.get_json(game_metadata_path(app_name)) do
-      {:error, :enoent} -> {:error, "Game not found"}
+      {:error, :enoent} ->
+        {:error, "Game not found"}
+
       {:ok, json} ->
-        %{ "app_name" => app_name} = json
+        %{"app_name" => app_name} = json
         json = Map.put(json, "install_info", installed_games()[app_name])
         {:ok, json}
     end
@@ -31,16 +33,19 @@ defmodule Heroix.Legendary do
         {:win32, _} -> ["win32", "legendary.exe"]
         {_, _} -> ["darwin", "legendary"]
       end
+
     Path.join([File.cwd!(), "priv", "bins", os, bin_name])
   end
 
   defp process_metadata(filename, installed_info) do
     case Heroix.get_json(filename) do
       {:ok, json} ->
-        %{ "app_name" => app_name} = json
+        %{"app_name" => app_name} = json
         json = Map.put(json, "install_info", installed_info[app_name])
-        { app_name, json }
-      {:error, :enoent} -> %{}
+        {app_name, json}
+
+      {:error, :enoent} ->
+        %{}
     end
   end
 

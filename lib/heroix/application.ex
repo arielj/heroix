@@ -16,7 +16,7 @@ defmodule Heroix.Application do
       HeroixWeb.Endpoint,
       {Heroix.GameRunner, name: GameRunner},
       {Heroix.Settings, name: Settings},
-      {Heroix.GameInstaller, name: GameInstaller},
+      {Heroix.GameInstaller, name: GameInstaller}
       # Start a worker by calling: Heroix.Worker.start_link(arg)
       # {Heroix.Worker, arg}
     ]
