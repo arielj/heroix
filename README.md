@@ -47,10 +47,10 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 
 ## TODO
 
-- Install dialog
+- Install dialog (with installation configuration)
 - Cancel installation (can be stopped, but needs more details)
 - Resume installation (it can be resumed by default, files are kept automatically)
-- Install queue visualizer
+- Install queue visualizer (display game being installed, games in the queue, games with updates available)
 - Visual hints for games in queue and installing in library
 - Save game config in Legendary's config.ini
 - Installation-related settings (install folder, more?)
@@ -67,7 +67,13 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Customize launch command
 - Pre/Post game scripts
 - Game OS version picker (Mac/Windows)
+- Game versions configuration (install older version?)
 - GOG integration
+
+## Links
+
+Heroic Games Launcher: https://github.com/Heroic-Games-Launcher/HeroicGamesLauncher
+Legendary: https://github.com/derrod/legendary#usage
 
 ## Learn more
 
