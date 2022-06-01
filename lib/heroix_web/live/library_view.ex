@@ -111,6 +111,8 @@ defmodule HeroixWeb.LibraryView do
     end)
   end
 
+  #### Handle events triggered by the user
+
   def handle_event("toggle_order", _, socket) do
     new_order =
       case socket.assigns.order do
@@ -135,7 +137,8 @@ defmodule HeroixWeb.LibraryView do
     {:noreply, assign(socket, search_term: "", games_list: get_games("", order))}
   end
 
-  # handle GameInstaller broadcasted events
+  #### handle GameInstaller broadcasted events
+
   def handle_info(%{event: "game_installed"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}

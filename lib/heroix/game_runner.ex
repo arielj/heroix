@@ -6,17 +6,9 @@ defmodule Heroix.GameRunner do
 
   @topic "game_runner"
 
-  def running_game() do
-    GenServer.call(GameRunner, :game_running)
-  end
-
-  def launch_game(app_name) do
-    GenServer.cast(GameRunner, {:launch, app_name})
-  end
-
-  def stop_game() do
-    GenServer.cast(GameRunner, :stop)
-  end
+  def running_game(), do: GenServer.call(GameRunner, :game_running)
+  def launch_game(app_name), do: GenServer.cast(GameRunner, {:launch, app_name})
+  def stop_game(), do: GenServer.cast(GameRunner, :stop)
 
   def start_link(options) do
     log("GenServer starting")
@@ -51,7 +43,9 @@ defmodule Heroix.GameRunner do
 
   def handle_cast(:stop, state = %{game_pid: game_pid, app_name: app_name}) do
     log("Stopping #{app_name} (OS pid: #{game_pid})")
+
     :exec.kill(game_pid, :sigkill)
+
     {:noreply, state}
   end
 
@@ -59,21 +53,16 @@ defmodule Heroix.GameRunner do
     {:reply, app_name, state}
   end
 
-  def handle_info({:stderr, _pid, msg}, state) do
+  def handle_info({std, _pid, msg}, state) when std in [:stderr, :stdout] do
     log("[Legendary] #{msg}")
-    {:noreply, state}
-  end
 
-  def handle_info({:stdout, _pid, msg}, state) do
-    log("[Legendary] #{msg}")
     {:noreply, state}
   end
 
   # search for the game's OS PID after legendary process ends
-  def handle_info(
-        msg = {:DOWN, _os_pid, :process, pid, :normal},
-        state = %{app_name: app_name, legendary_pid: legendary_pid}
-      ) do
+  def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
+    %{app_name: app_name, legendary_pid: legendary_pid} = state
+
     if pid == legendary_pid do
       log("Legendary launched the game")
       game_pid = find_game_pid(app_name)
@@ -90,10 +79,9 @@ defmodule Heroix.GameRunner do
   end
 
   # updates state after game process ends
-  def handle_info(
-        msg = {:DOWN, os_pid, :process, _pid, {:exit_status, exit_status}},
-        state = %{game_pid: game_pid, app_name: app_name}
-      ) do
+  def handle_info(msg = {:DOWN, os_pid, :process, _pid, {:exit_status, exit_status}}, state) do
+    %{game_pid: game_pid, app_name: app_name} = state
+
     # update the state with this PID
     if os_pid == game_pid do
       log("Game finished with status: #{exit_status}")

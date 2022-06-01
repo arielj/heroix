@@ -23,11 +23,9 @@ defmodule Heroix.Settings do
     {:reply, global_settings, state}
   end
 
-  def handle_call(
-        {:set_global, key, value, save: save},
-        _from,
-        state = %{global: global_settings}
-      ) do
+  def handle_call({:set_global, key, value, save: save}, _from, state) do
+    %{global: global_settings} = state
+
     new_global = Map.put(global_settings, key, value)
     state = Map.put(state, :global, new_global)
 

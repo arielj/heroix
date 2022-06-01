@@ -26,6 +26,8 @@ defmodule Heroix.GameInstaller do
     {:ok, initial_state()}
   end
 
+  #### Trigger an async action, don't wait for result
+
   # if nothing is being installed, install app_name
   def handle_cast({:install, app_name}, state = %{installing: nil}) do
     pid = install(app_name, state)
@@ -44,7 +46,7 @@ defmodule Heroix.GameInstaller do
     {:noreply, state}
   end
 
-  # if something is being installed, enqueue app_name
+  # stop the current installation in progress
   def handle_cast(:stop, state = %{installing_pid: pid, installing: installing_app_name}) do
     log("Stop installation of #{installing_app_name}")
 
@@ -53,6 +55,7 @@ defmodule Heroix.GameInstaller do
     {:noreply, state}
   end
 
+  # uninstall app_name
   def handle_cast({:uninstall, app_name}, state) do
     pid = uninstall(app_name, state)
 
@@ -61,17 +64,13 @@ defmodule Heroix.GameInstaller do
     {:noreply, Map.merge(state, %{uninstalling: app_name, uninstalling_pid: pid})}
   end
 
-  def handle_info({:stderr, _pid, msg}, state = %{installing: app_name}) do
+  #### Handle info messages sent by the legendary commands
+
+  # process legendary process output
+  def handle_info({std, _pid, msg}, state) when std in [:stdout, :stderr] do
     log("[Legendary] #{msg}")
 
-    process_progress(msg, app_name)
-
-    {:noreply, state}
-  end
-
-  def handle_info({:stdout, _pid, msg}, state = %{installing: app_name}) do
-    log("[Legendary] #{msg}")
-
+    %{installing: app_name} = state
     process_progress(msg, app_name)
 
     {:noreply, state}
@@ -94,7 +93,7 @@ defmodule Heroix.GameInstaller do
         installing: nil
       })
 
-    {:noreply, Map.merge(state, new_state)}
+    {:noreply, new_state}
   end
 
   # when legendary command ends normally
@@ -146,6 +145,8 @@ defmodule Heroix.GameInstaller do
     {:noreply, state}
   end
 
+  #### Actions to perform after main commands
+
   # broadcast installed game and then check queue to continue installing
   def handle_continue({:broadcast_installed, app_name}, state) do
     HeroixWeb.Endpoint.broadcast!(@topic, "game_installed", %{app_name: app_name})
@@ -172,6 +173,8 @@ defmodule Heroix.GameInstaller do
     {:noreply, state}
   end
 
+  #### Sync functions, return some data to caller
+
   # return name of the current game being installed
   def handle_call(:installing, _from, state = %{installing: app_name}) do
     {:reply, app_name, state}
@@ -179,6 +182,8 @@ defmodule Heroix.GameInstaller do
 
   # return the list of all games in the install queue
   def handle_call(:queue, _from, state = %{queue: queue}), do: {:reply, queue, state}
+
+  #### Some helper function
 
   defp log(msg) do
     Logger.info("[GameInstaller] #{String.trim(msg)}")

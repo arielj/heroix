@@ -132,6 +132,8 @@ defmodule HeroixWeb.GameView do
     """
   end
 
+  #### Handle events triggered by the user
+
   def handle_event("launch", %{}, socket) do
     GameRunner.launch_game(socket.assigns.app_name)
     {:noreply, socket}
@@ -157,7 +159,8 @@ defmodule HeroixWeb.GameView do
     {:noreply, socket}
   end
 
-  # handle GameRunner broadcasted events
+  #### handle GameRunner and GameInstaller broadcasted messages
+
   def handle_info(%{event: "game_launched", payload: %{app_name: app_name}}, socket) do
     {:noreply, assign(socket, game_running: app_name)}
   end
