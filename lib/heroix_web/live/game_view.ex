@@ -25,7 +25,9 @@ defmodule HeroixWeb.GameView do
        page_title: game_info["app_title"],
        game_running: GameRunner.running_game(),
        installing: GameInstaller.installing(),
-       install_queue: GameInstaller.queue()
+       install_queue: GameInstaller.queue(),
+       install_progress: nil,
+       install_eta: nil
      )}
   end
 
@@ -103,7 +105,11 @@ defmodule HeroixWeb.GameView do
             </button>
           <% else %>
             <%= if @installing == @game["app_name"] do %>
-              Installing...
+              Installing <%= @install_progress %>% (ETA: <%= @install_eta %>)
+              <button phx-click="stop-installation">
+                <.font_icon icon="stop" />
+                Stop Installation
+              </button>
             <% else %>
               <%= if Enum.member?(@install_queue, @game["app_name"]) do %>
                 In install queue
@@ -146,6 +152,11 @@ defmodule HeroixWeb.GameView do
     {:noreply, socket}
   end
 
+  def handle_event("stop-installation", %{}, socket) do
+    GameInstaller.stop_installation()
+    {:noreply, socket}
+  end
+
   # handle GameRunner broadcasted events
   def handle_info(%{event: "game_launched", payload: %{app_name: app_name}}, socket) do
     {:noreply, assign(socket, game_running: app_name)}
@@ -164,7 +175,9 @@ defmodule HeroixWeb.GameView do
        assign(socket,
          game: game_info,
          installing: GameInstaller.installing(),
-         install_queue: GameInstaller.queue()
+         install_queue: GameInstaller.queue(),
+         install_progress: nil,
+         install_eta: nil
        )}
     else
       {:noreply, socket}
@@ -187,5 +200,27 @@ defmodule HeroixWeb.GameView do
 
   def handle_info(%{event: "uninstalling_game"}, socket) do
     {:noreply, socket}
+  end
+
+  def handle_info(%{event: "installation_progress", payload: payload}, socket) do
+    %{app_name: app_name, percent: percent, eta: eta} = payload
+
+    if app_name == socket.assigns.app_name do
+      {:noreply, assign(socket, install_progress: percent, install_eta: eta)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "installation_stopped", payload: %{app_name: app_name}}, socket) do
+    if app_name == socket.assigns.app_name do
+      {:noreply,
+       assign(socket,
+         installing: GameInstaller.installing(),
+         install_queue: GameInstaller.queue()
+       )}
+    else
+      {:noreply, socket}
+    end
   end
 end
