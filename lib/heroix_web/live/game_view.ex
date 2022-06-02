@@ -168,6 +168,21 @@ defmodule HeroixWeb.GameView do
 
   #### handle GameInstaller broadcasted events
 
+  def handle_info(%{event: "installing"}, socket) do
+    {:noreply,
+     assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}
+  end
+
+  def handle_info(%{event: "installation_progress", payload: payload}, socket) do
+    %{app_name: app_name, percent: percent, eta: eta} = payload
+
+    if app_name == socket.assigns.app_name do
+      {:noreply, assign(socket, install_progress: percent, install_eta: eta)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_info(%{event: "installed", payload: %{app_name: app_name}}, socket) do
     if app_name == socket.assigns.app_name do
       {:ok, game_info} = Legendary.game_info(app_name)
@@ -180,21 +195,6 @@ defmodule HeroixWeb.GameView do
          install_progress: nil,
          install_eta: nil
        )}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(%{event: "installing"}, socket) do
-    {:noreply,
-     assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}
-  end
-
-  def handle_info(%{event: "installation_progress", payload: payload}, socket) do
-    %{app_name: app_name, percent: percent, eta: eta} = payload
-
-    if app_name == socket.assigns.app_name do
-      {:noreply, assign(socket, install_progress: percent, install_eta: eta)}
     else
       {:noreply, socket}
     end
@@ -214,6 +214,10 @@ defmodule HeroixWeb.GameView do
 
   #### handle GameUninstaller broadcasted events
 
+  def handle_info(%{event: "uninstalling"}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(%{event: "uninstalled", payload: %{app_name: app_name}}, socket) do
     if app_name == socket.assigns.app_name do
       {:ok, game_info} = Legendary.game_info(app_name)
@@ -221,9 +225,5 @@ defmodule HeroixWeb.GameView do
     else
       {:noreply, socket}
     end
-  end
-
-  def handle_info(%{event: "uninstalling"}, socket) do
-    {:noreply, socket}
   end
 end

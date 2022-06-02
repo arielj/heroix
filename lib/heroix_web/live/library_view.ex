@@ -137,21 +137,21 @@ defmodule HeroixWeb.LibraryView do
 
   #### handle GameInstaller/Uninstaller broadcasted events
 
+  def handle_info(%{event: "installing"}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(%{event: "installed"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}
   end
 
+  def handle_info(%{event: "uninstalling"}, socket) do
+    {:noreply, socket}
+  end
+
   def handle_info(%{event: "uninstalled"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}
-  end
-
-  def handle_info(%{event: "installing"}, socket) do
-    {:noreply, socket}
-  end
-
-  def handle_info(%{event: "uninstalling"}, socket) do
-    {:noreply, socket}
   end
 end
