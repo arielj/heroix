@@ -4,12 +4,11 @@ defmodule Heroix.GameInstaller do
 
   alias Heroix.Legendary
 
-  @topic "game_installer"
+  @topic "game_status"
 
   # execute actions and get state
   def install_game(app_name), do: GenServer.cast(GameInstaller, {:install, app_name})
   def update_game(app_name), do: GenServer.cast(GameInstaller, {:update, app_name})
-  def uninstall_game(app_name), do: GenServer.cast(GameInstaller, {:uninstall, app_name})
   def stop_installation(), do: GenServer.cast(GameInstaller, :stop)
   def installing(), do: GenServer.call(GameInstaller, :installing)
   def queue(), do: GenServer.call(GameInstaller, :queue)
@@ -32,7 +31,7 @@ defmodule Heroix.GameInstaller do
   def handle_cast({:install, app_name}, state = %{installing: nil}) do
     pid = install(app_name, state)
 
-    HeroixWeb.Endpoint.broadcast!(@topic, "installing_game", %{app_name: app_name})
+    HeroixWeb.Endpoint.broadcast!(@topic, "installing", %{app_name: app_name})
 
     {:noreply, Map.merge(state, %{installing: app_name, installing_pid: pid})}
   end
@@ -53,15 +52,6 @@ defmodule Heroix.GameInstaller do
     :exec.kill(pid, :sigkill)
 
     {:noreply, state}
-  end
-
-  # uninstall app_name
-  def handle_cast({:uninstall, app_name}, state) do
-    pid = uninstall(app_name, state)
-
-    HeroixWeb.Endpoint.broadcast!(@topic, "uninstalling_game", %{app_name: app_name})
-
-    {:noreply, Map.merge(state, %{uninstalling: app_name, uninstalling_pid: pid})}
   end
 
   #### Handle info messages sent by the legendary commands
@@ -101,9 +91,7 @@ defmodule Heroix.GameInstaller do
     %{
       installing: installing_app_name,
       queue: queue,
-      installing_pid: installing_pid,
-      uninstalling_pid: uninstalling_pid,
-      uninstalling: uninstalling_app_name
+      installing_pid: installing_pid
     } = state
 
     # check if pid matches an installation or uninstallation pid
@@ -125,15 +113,6 @@ defmodule Heroix.GameInstaller do
         # noreply and then broadcast installed
         {:noreply, new_state, {:continue, {:broadcast_installed, installing_app_name}}}
 
-      pid == uninstalling_pid ->
-        log("Uninstall completed")
-
-        # update state
-        new_state = Map.merge(state, %{uninstalling_pid: nil, uninstalling: nil})
-
-        # noreply and then broadcast uninstalled
-        {:noreply, new_state, {:continue, {:broadcast_uninstalled, uninstalling_app_name}}}
-
       true ->
         log("Unknown process DOWN #{inspect(msg)}")
         {:noreply, state}
@@ -149,16 +128,9 @@ defmodule Heroix.GameInstaller do
 
   # broadcast installed game and then check queue to continue installing
   def handle_continue({:broadcast_installed, app_name}, state) do
-    HeroixWeb.Endpoint.broadcast!(@topic, "game_installed", %{app_name: app_name})
+    HeroixWeb.Endpoint.broadcast!(@topic, "installed", %{app_name: app_name})
 
     {:noreply, state, {:continue, :check_queue}}
-  end
-
-  # broadcast uninstalled game
-  def handle_continue({:broadcast_uninstalled, app_name}, state) do
-    HeroixWeb.Endpoint.broadcast!(@topic, "game_uninstalled", %{app_name: app_name})
-
-    {:noreply, state}
   end
 
   # check if queue has something to install
@@ -194,8 +166,6 @@ defmodule Heroix.GameInstaller do
       path: Legendary.bin_path(),
       installing: nil,
       installing_pid: nil,
-      uninstalling: nil,
-      uninstalling_pid: nil,
       queue: []
     }
   end
@@ -209,17 +179,6 @@ defmodule Heroix.GameInstaller do
   defp install(app_name, %{path: path}) do
     args = ["-y", "install", app_name]
     log("Installing: #{app_name}")
-
-    {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
-    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
-
-    pid
-  end
-
-  # run legendary uninstall app, monitor process and return pid
-  defp uninstall(app_name, %{path: path}) do
-    args = ["-y", "uninstall", app_name]
-    log("Uninstalling: #{app_name}")
 
     {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
     log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")

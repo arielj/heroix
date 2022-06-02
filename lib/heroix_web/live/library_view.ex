@@ -4,10 +4,8 @@ defmodule HeroixWeb.LibraryView do
   alias Heroix.Legendary
   import HeroixWeb.GameImageComponent
 
-  @installer_topic "game_installer"
-
   def mount(_params, %{}, socket) do
-    HeroixWeb.Endpoint.subscribe(@installer_topic)
+    HeroixWeb.Endpoint.subscribe("game_status")
     {:ok, assign(socket, order: "asc", search_term: "", games_list: get_games())}
   end
 
@@ -137,23 +135,23 @@ defmodule HeroixWeb.LibraryView do
     {:noreply, assign(socket, search_term: "", games_list: get_games("", order))}
   end
 
-  #### handle GameInstaller broadcasted events
+  #### handle GameInstaller/Uninstaller broadcasted events
 
-  def handle_info(%{event: "game_installed"}, socket) do
+  def handle_info(%{event: "installed"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}
   end
 
-  def handle_info(%{event: "game_uninstalled"}, socket) do
+  def handle_info(%{event: "uninstalled"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}
   end
 
-  def handle_info(%{event: "installing_game"}, socket) do
+  def handle_info(%{event: "installing"}, socket) do
     {:noreply, socket}
   end
 
-  def handle_info(%{event: "uninstalling_game"}, socket) do
+  def handle_info(%{event: "uninstalling"}, socket) do
     {:noreply, socket}
   end
 end

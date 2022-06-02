@@ -4,19 +4,16 @@ defmodule HeroixWeb.GameView do
   alias Heroix.Legendary
   alias Heroix.GameRunner
   alias Heroix.GameInstaller
+  alias Heroix.GameUninstaller
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
-
-  @runner_topic "game_runner"
-  @installer_topic "game_installer"
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
     # IO.inspect(game_info)
 
-    # subscribe to game runner updates
-    HeroixWeb.Endpoint.subscribe(@runner_topic)
-    HeroixWeb.Endpoint.subscribe(@installer_topic)
+    # subscribe to game status updates
+    HeroixWeb.Endpoint.subscribe("game_status")
 
     {:ok,
      assign(socket,
@@ -150,7 +147,7 @@ defmodule HeroixWeb.GameView do
   end
 
   def handle_event("uninstall", %{}, socket) do
-    GameInstaller.uninstall_game(socket.assigns.app_name)
+    GameUninstaller.uninstall_game(socket.assigns.app_name)
     {:noreply, socket}
   end
 
@@ -159,18 +156,19 @@ defmodule HeroixWeb.GameView do
     {:noreply, socket}
   end
 
-  #### handle GameRunner and GameInstaller broadcasted messages
+  #### handle GameRunner broadcasted messages
 
-  def handle_info(%{event: "game_launched", payload: %{app_name: app_name}}, socket) do
+  def handle_info(%{event: "launched", payload: %{app_name: app_name}}, socket) do
     {:noreply, assign(socket, game_running: app_name)}
   end
 
-  def handle_info(%{event: "game_stopped"}, socket) do
+  def handle_info(%{event: "stopped"}, socket) do
     {:noreply, assign(socket, game_running: nil)}
   end
 
-  # handle GameInstaller broadcasted events
-  def handle_info(%{event: "game_installed", payload: %{app_name: app_name}}, socket) do
+  #### handle GameInstaller broadcasted events
+
+  def handle_info(%{event: "installed", payload: %{app_name: app_name}}, socket) do
     if app_name == socket.assigns.app_name do
       {:ok, game_info} = Legendary.game_info(app_name)
 
@@ -187,22 +185,9 @@ defmodule HeroixWeb.GameView do
     end
   end
 
-  def handle_info(%{event: "installing_game"}, socket) do
+  def handle_info(%{event: "installing"}, socket) do
     {:noreply,
      assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}
-  end
-
-  def handle_info(%{event: "game_uninstalled", payload: %{app_name: app_name}}, socket) do
-    if app_name == socket.assigns.app_name do
-      {:ok, game_info} = Legendary.game_info(app_name)
-      {:noreply, assign(socket, game: game_info)}
-    else
-      {:noreply, socket}
-    end
-  end
-
-  def handle_info(%{event: "uninstalling_game"}, socket) do
-    {:noreply, socket}
   end
 
   def handle_info(%{event: "installation_progress", payload: payload}, socket) do
@@ -225,5 +210,20 @@ defmodule HeroixWeb.GameView do
     else
       {:noreply, socket}
     end
+  end
+
+  #### handle GameUninstaller broadcasted events
+
+  def handle_info(%{event: "uninstalled", payload: %{app_name: app_name}}, socket) do
+    if app_name == socket.assigns.app_name do
+      {:ok, game_info} = Legendary.game_info(app_name)
+      {:noreply, assign(socket, game: game_info)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_info(%{event: "uninstalling"}, socket) do
+    {:noreply, socket}
   end
 end

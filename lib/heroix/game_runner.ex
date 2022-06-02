@@ -4,7 +4,7 @@ defmodule Heroix.GameRunner do
 
   alias Heroix.Legendary
 
-  @topic "game_runner"
+  @topic "game_status"
 
   def running_game(), do: GenServer.call(GameRunner, :game_running)
   def launch_game(app_name), do: GenServer.cast(GameRunner, {:launch, app_name})
@@ -36,7 +36,7 @@ defmodule Heroix.GameRunner do
         legendary_pid: pid
       })
 
-    HeroixWeb.Endpoint.broadcast!(@topic, "game_launched", %{app_name: app_name})
+    HeroixWeb.Endpoint.broadcast!(@topic, "launched", %{app_name: app_name})
 
     {:noreply, state}
   end
@@ -85,7 +85,7 @@ defmodule Heroix.GameRunner do
     # update the state with this PID
     if os_pid == game_pid do
       log("Game finished with status: #{exit_status}")
-      HeroixWeb.Endpoint.broadcast(@topic, "game_stopped", %{app_name: app_name})
+      HeroixWeb.Endpoint.broadcast(@topic, "stopped", %{app_name: app_name})
       {:noreply, initial_state()}
     else
       log("Unknown process DOWN #{msg}")
