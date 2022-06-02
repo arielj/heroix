@@ -30,6 +30,7 @@ defmodule HeroixWeb.Router do
     live "/", LibraryView
     live "/library", LibraryView
     live "/library/:app_name", GameView
+    live "/downloads", DownloadsView
     live "/settings", SettingsView
   end
 

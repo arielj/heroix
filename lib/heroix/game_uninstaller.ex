@@ -7,7 +7,7 @@ defmodule Heroix.GameUninstaller do
   @topic "game_status"
 
   # execute actions and get state
-  def uninstall_game(app_name), do: GenServer.cast(GameInstaller, {:uninstall, app_name})
+  def uninstall_game(app_name), do: GenServer.cast(GameUninstaller, {:uninstall, app_name})
 
   def start_link(options) do
     log("GenServer starting")

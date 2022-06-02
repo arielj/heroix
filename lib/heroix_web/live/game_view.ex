@@ -226,4 +226,9 @@ defmodule HeroixWeb.GameView do
       {:noreply, socket}
     end
   end
+
+  def handle_info(event, socket) do
+    IO.inspect("Unhandled info: #{inspect(event)}")
+    {:noreply, socket}
+  end
 end

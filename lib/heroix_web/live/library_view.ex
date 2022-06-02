@@ -1,5 +1,6 @@
 defmodule HeroixWeb.LibraryView do
   use HeroixWeb, :live_view
+  require Logger
 
   alias Heroix.Legendary
   import HeroixWeb.GameImageComponent
@@ -153,5 +154,10 @@ defmodule HeroixWeb.LibraryView do
   def handle_info(%{event: "uninstalled"}, socket) do
     %{order: order, search_term: search_term} = socket.assigns
     {:noreply, assign(socket, games_list: get_games(search_term, order))}
+  end
+
+  def handle_info(event, socket) do
+    Logger.info("Unhandled info: #{inspect(event)}")
+    {:noreply, socket}
   end
 end

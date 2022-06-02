@@ -29,6 +29,8 @@ defmodule Heroix.GameInstaller do
 
   # if nothing is being installed, install app_name
   def handle_cast({:install, app_name}, state = %{installing: nil}) do
+    log("Install #{app_name}")
+
     pid = install(app_name, state)
 
     HeroixWeb.Endpoint.broadcast!(@topic, "installing", %{app_name: app_name})
@@ -42,6 +44,8 @@ defmodule Heroix.GameInstaller do
 
     state = Map.put(state, :queue, state.queue ++ [app_name])
 
+    HeroixWeb.Endpoint.broadcast!(@topic, "enqueued", %{app_name: app_name})
+
     {:noreply, state}
   end
 
@@ -51,7 +55,10 @@ defmodule Heroix.GameInstaller do
 
     :exec.kill(pid, :sigkill)
 
-    {:noreply, state}
+    HeroixWeb.Endpoint.broadcast!(@topic, "installation_stopped", %{app_name: installing_app_name})
+
+    {:noreply, Map.merge(state, %{installing: nil, installing_pid: nil}),
+     {:continue, {:remove_from_queue, installing_app_name}}}
   end
 
   #### Handle info messages sent by the legendary commands
@@ -68,29 +75,24 @@ defmodule Heroix.GameInstaller do
 
   # when installation is stopped by the user
   def handle_info({:DOWN, _os_pid, :process, _pid, {:exit_status, 9}}, state) do
-    %{installing: stopped_app_name, queue: queue} = state
+    # %{installing: stopped_app_name} = state
 
-    HeroixWeb.Endpoint.broadcast!(@topic, "installation_stopped", %{app_name: stopped_app_name})
-
-    # remove game from queue
-    new_queue = Enum.reject(queue, fn name -> name == stopped_app_name end)
-
-    # update state
-    new_state =
-      Map.merge(state, %{
-        queue: new_queue,
-        installing_pid: nil,
-        installing: nil
-      })
-
-    {:noreply, new_state}
+    {:noreply, state}
   end
+
+  # # when installation is stopped by an exception in Legendary
+  # def handle_info({:DOWN, _os_pid, :process, _pid, {:exit_status, 256}}, state) do
+  #   %{installing: stopped_app_name} = state
+
+  #   IO.inspect("Error installing game, check logs")
+
+  #   {:noreply, state, {:continue, {:remove_from_queue, stopped_app_name}}}
+  # end
 
   # when legendary command ends normally
   def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
     %{
       installing: installing_app_name,
-      queue: queue,
       installing_pid: installing_pid
     } = state
 
@@ -99,19 +101,17 @@ defmodule Heroix.GameInstaller do
       pid == installing_pid ->
         log("Installation completed")
 
-        # remove game from queue
-        new_queue = Enum.reject(queue, fn name -> name == installing_app_name end)
-
         # update state
         new_state =
           Map.merge(state, %{
-            queue: new_queue,
             installing_pid: nil,
             installing: nil
           })
 
+        HeroixWeb.Endpoint.broadcast!(@topic, "installed", %{app_name: installing_app_name})
+
         # noreply and then broadcast installed
-        {:noreply, new_state, {:continue, {:broadcast_installed, installing_app_name}}}
+        {:noreply, new_state, {:continue, {:remove_from_queue, installing_app_name}}}
 
       true ->
         log("Unknown process DOWN #{inspect(msg)}")
@@ -126,22 +126,30 @@ defmodule Heroix.GameInstaller do
 
   #### Actions to perform after main commands
 
-  # broadcast installed game and then check queue to continue installing
-  def handle_continue({:broadcast_installed, app_name}, state) do
-    HeroixWeb.Endpoint.broadcast!(@topic, "installed", %{app_name: app_name})
+  def handle_continue({:remove_from_queue, app_name}, state = %{queue: queue}) do
+    log("Removing game from queue")
 
-    {:noreply, state, {:continue, :check_queue}}
+    new_queue = Enum.reject(queue, fn name -> name == app_name end)
+
+    {:noreply, Map.merge(state, %{queue: new_queue}), {:continue, :check_queue}}
   end
 
-  # check if queue has something to install
   def handle_continue(:check_queue, state = %{queue: queue}) do
     log("Checking install queue")
-    # trigger installation of next game in queue
-    if length(queue) > 0 do
-      # install_game(hd(queue))
-      log("Should install #{hd(queue)}")
-    end
 
+    if length(queue) > 0 do
+      [app_to_install | new_queue] = queue
+      {:noreply, Map.merge(state, %{queue: new_queue}), {:continue, {:install, app_to_install}}}
+    else
+      {:noreply, state}
+    end
+  end
+
+  def handle_continue({:install, nil}, state), do: {:noreply, state}
+
+  def handle_continue({:install, app_to_install}, state) do
+    install_game(app_to_install)
+    # log("Should install #{hd(queue)}")
     {:noreply, state}
   end
 
