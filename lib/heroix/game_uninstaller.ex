@@ -7,6 +7,7 @@ defmodule Heroix.GameUninstaller do
 
   # execute actions and get state
   def uninstall_game(app_name), do: GenServer.cast(GameUninstaller, {:uninstall, app_name})
+  def reset(), do: GenServer.call(GameInstaller, :reset)
 
   def start_link(options) do
     log("GenServer starting")
@@ -67,6 +68,8 @@ defmodule Heroix.GameUninstaller do
     {:noreply, state}
   end
 
+  def handle_call(:reset, _from, _), do: {:reply, nil, initial_state()}
+
   #### Actions to perform after main commands
 
   # broadcast uninstalled game
@@ -89,18 +92,13 @@ defmodule Heroix.GameUninstaller do
     }
   end
 
-  # Converts Elixir pid (not OS pid) to string
-  defp pid_to_string(pid) do
-    pid |> :erlang.pid_to_list() |> to_string()
-  end
-
   # run legendary uninstall app, monitor process and return pid
   defp uninstall(app_name) do
     args = ["-y", "uninstall", app_name]
     log("Uninstalling: #{app_name}")
 
     {:ok, pid, osPid} = @binary.run(args)
-    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
+    log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid
   end

@@ -1,5 +1,6 @@
 defmodule Heroix.LegendaryBin do
   def run(args) do
+    # {:group, 0} and :kill_group are needed to properly kill the installation process and all the workers
     :exec.run([bin_path() | args], [:stdout, :stderr, :monitor, :kill_group, {:group, 0}])
   end
 

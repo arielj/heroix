@@ -102,7 +102,11 @@ defmodule HeroixWeb.GameView do
             </button>
           <% else %>
             <%= if @installing == @game["app_name"] do %>
-              Installing <%= @install_progress %>% (ETA: <%= @install_eta %>)
+              <%= if @install_progress && @install_eta do %>
+                Installing <%= @install_progress %>% (ETA: <%= @install_eta %>)
+              <% else %>
+                Starting installation...
+              <% end %>
               <button phx-click="stop-installation">
                 <.font_icon icon="stop" />
                 Stop Installation

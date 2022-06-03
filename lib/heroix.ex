@@ -58,4 +58,13 @@ defmodule Heroix do
 
     "#{Float.round(value, 2)}#{unit}"
   end
+
+  # Converts Elixir pid (not OS pid) to string
+  def pid_to_string(pid) do
+    cond do
+      is_binary(pid) -> pid
+      is_integer(pid) -> Integer.to_string(pid)
+      true -> pid |> :erlang.pid_to_list() |> to_string()
+    end
+  end
 end

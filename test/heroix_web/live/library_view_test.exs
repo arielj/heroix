@@ -18,6 +18,8 @@ defmodule HeroixWeb.LibraryViewTest do
     sherlock = "Sherlock Holmes Crimes and Punishments"
     stranger = "Stranger Things 3: The Game"
     batman = "Batman™ Arkham Asylum Game of the Year Edition"
+    Heroix.GameInstaller.reset()
+    Heroix.GameUninstaller.reset()
 
     %{games: %{alan_wake: alan_wake, batman: batman, sherlock: sherlock, stranger: stranger}}
   end
@@ -49,13 +51,15 @@ defmodule HeroixWeb.LibraryViewTest do
     assert view |> element("a[title='#{games[:stranger]}']:not(.installed)") |> has_element?()
     assert view |> element("a[title='#{games[:batman]}'].installed)") |> has_element?()
     # use string directly here so it's not escaped, testing the `'` character
-    assert view |> element("a[title=\"Alan Wake's American Nightmare\"].installed)") |> has_element?()
+    assert view
+           |> element("a[title=\"Alan Wake's American Nightmare\"].installed)")
+           |> has_element?()
   end
 
   test "links to the game page", %{conn: conn, games: games} do
     {:ok, view, _} = live(conn, "/library")
     view |> element("a[title='#{games[:batman]}'].installed)") |> render_click()
-    assert_redirected view, "/library/Godwit"
+    assert_redirected(view, "/library/Godwit")
   end
 
   describe "get_games sorting" do
@@ -108,6 +112,58 @@ defmodule HeroixWeb.LibraryViewTest do
       assert rest == 0
 
       assert "Sherlock Holmes Crimes and Punishments" == game["app_title"]
+    end
+  end
+
+  describe "install button" do
+    test "starts installing a game", %{conn: conn} do
+      {:ok, view, _html} = live(conn, "/library/0afb9d54dd3743a582b48b506466d3f8")
+
+      view |> element("button", "Install") |> render_click()
+
+      assert Heroix.GameInstaller.installing() == "0afb9d54dd3743a582b48b506466d3f8"
+    end
+
+    test "adds a game to the install queue", %{conn: conn} do
+      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec")
+
+      assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
+
+      {:ok, view, _html} = live(conn, "/library/0afb9d54dd3743a582b48b506466d3f8")
+
+      view |> element("button", "Install") |> render_click()
+
+      assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
+      assert Heroix.GameInstaller.queue() == ["0afb9d54dd3743a582b48b506466d3f8"]
+    end
+  end
+
+  describe "stop installation button" do
+    test "cancels the installation", %{conn: conn} do
+      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec")
+
+      assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
+      assert Heroix.GameInstaller.queue() == []
+
+      {:ok, view, html} = live(conn, "/library/0a697c1235fb4706a635cfa33f0306ec")
+
+      assert html =~ "Starting installation..."
+
+      view |> element("button", "Stop Installation") |> render_click()
+
+      assert :sys.get_state(GameInstaller).stopping == "0a697c1235fb4706a635cfa33f0306ec"
+
+      assert view |> element("button", "Install") |> has_element?()
+    end
+  end
+
+  describe "uninstall button" do
+    test "triggers the game uninstallation", %{conn: conn} do
+      {:ok, view, html} = live(conn, "/library/Godwit")
+
+      view |> element("button", "Uninstall") |> render_click()
+
+      assert :sys.get_state(GameUninstaller).uninstalling == "Godwit"
     end
   end
 end

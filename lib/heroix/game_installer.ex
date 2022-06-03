@@ -10,6 +10,7 @@ defmodule Heroix.GameInstaller do
   def install_game(app_name), do: GenServer.cast(GameInstaller, {:install, app_name})
   def update_game(app_name), do: GenServer.cast(GameInstaller, {:update, app_name})
   def stop_installation(), do: GenServer.cast(GameInstaller, :stop)
+  def reset(), do: GenServer.call(GameInstaller, :reset)
   def installing(), do: GenServer.call(GameInstaller, :installing)
   def queue(), do: GenServer.call(GameInstaller, :queue)
 
@@ -28,7 +29,7 @@ defmodule Heroix.GameInstaller do
   # if nothing is being installed, start installing app_name
   def handle_cast({:install, app_name}, state = %{installing: nil}) do
     pid = install(app_name)
-    log("Install #{app_name} in pid #{pid_to_string(pid)}")
+    log("Install #{app_name} in pid #{Heroix.pid_to_string(pid)}")
 
     new_state = Map.merge(state, %{installing: app_name, installing_pid: pid})
 
@@ -49,10 +50,7 @@ defmodule Heroix.GameInstaller do
   end
 
   # stop the current installation in progress
-  def handle_cast(
-        :stop,
-        state = %{installing_pid: pid, installing: app_name}
-      ) do
+  def handle_cast(:stop, state = %{installing_pid: pid, installing: app_name}) do
     log("Stopping installation of #{app_name}")
 
     @binary.kill(pid)
@@ -161,6 +159,8 @@ defmodule Heroix.GameInstaller do
   # return the list of all games in the install queue
   def handle_call(:queue, _from, state = %{queue: queue}), do: {:reply, queue, state}
 
+  def handle_call(:reset, _from, _), do: {:reply, nil, initial_state()}
+
   #### Some helper function
 
   defp log(msg) do
@@ -176,18 +176,13 @@ defmodule Heroix.GameInstaller do
     }
   end
 
-  # Converts Elixir pid (not OS pid) to string
-  defp pid_to_string(pid) do
-    pid |> :erlang.pid_to_list() |> to_string()
-  end
-
   # run legendary install app, monitor process and return pid
   defp install(app_name) do
     args = ["-y", "install", app_name]
     log("Installing: #{app_name}")
 
     {:ok, pid, osPid} = @binary.run(args)
-    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
+    log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid
   end

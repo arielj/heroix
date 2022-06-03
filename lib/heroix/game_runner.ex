@@ -8,6 +8,7 @@ defmodule Heroix.GameRunner do
   def running_game(), do: GenServer.call(GameRunner, :game_running)
   def launch_game(app_name), do: GenServer.cast(GameRunner, {:launch, app_name})
   def stop_game(), do: GenServer.cast(GameRunner, :stop)
+  def reset(), do: GenServer.call(GameInstaller, :reset)
 
   def start_link(options) do
     log("GenServer starting")
@@ -24,7 +25,7 @@ defmodule Heroix.GameRunner do
     log("Launching game: #{path} #{Enum.join(args, " ")}")
 
     {:ok, pid, osPid} = @binary.run(args)
-    log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
+    log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
 
     state =
       Map.merge(state, %{
@@ -49,6 +50,8 @@ defmodule Heroix.GameRunner do
   def handle_call(:game_running, _from, state = %{app_name: app_name}) do
     {:reply, app_name, state}
   end
+
+  def handle_call(:reset, _from, _), do: {:reply, nil, initial_state()}
 
   def handle_info({std, _pid, msg}, state) when std in [:stderr, :stdout] do
     log("[Legendary] #{msg}")
@@ -131,10 +134,5 @@ defmodule Heroix.GameRunner do
   defp extract_pid(line) do
     Regex.split(~r/\s/, line, trim: true)
     |> List.first()
-  end
-
-  # Converts Elixir pid (not OS pid) to string
-  defp pid_to_string(pid) do
-    pid |> :erlang.pid_to_list() |> to_string()
   end
 end
