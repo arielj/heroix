@@ -29,14 +29,7 @@ defmodule Heroix.ImagesCache do
   end
 
   defp filepath(app_name, variant, extension) do
-    # TODO: kinda ugly to check env here
-    filename =
-      case Application.get_env(:your_app, :env) do
-        :test -> "test-image.png"
-        _ -> "#{app_name}-#{variant}#{extension}"
-      end
-
-    Path.join([images_cache_path(), filename])
+    Path.join([images_cache_path(), "#{app_name}-#{variant}#{extension}"])
   end
 
   defp images_cache_path do

@@ -2,8 +2,7 @@ defmodule Heroix.GameUninstaller do
   use GenServer
   require Logger
 
-  alias Heroix.Legendary
-
+  @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
   @topic "game_status"
 
   # execute actions and get state
@@ -16,8 +15,6 @@ defmodule Heroix.GameUninstaller do
 
   def init([]) do
     log("GenServer started")
-    # :exec.start_link([])
-    :exec.start_link([:debug])
     {:ok, initial_state()}
   end
 
@@ -25,11 +22,13 @@ defmodule Heroix.GameUninstaller do
 
   # uninstall app_name
   def handle_cast({:uninstall, app_name}, state) do
-    pid = uninstall(app_name, state)
+    pid = uninstall(app_name)
+
+    new_state = Map.merge(state, %{uninstalling: app_name, uninstalling_pid: pid})
 
     HeroixWeb.Endpoint.broadcast!(@topic, "uninstalling", %{app_name: app_name})
 
-    {:noreply, Map.merge(state, %{uninstalling: app_name, uninstalling_pid: pid})}
+    {:noreply, new_state}
   end
 
   #### Handle info messages sent by the legendary commands
@@ -53,10 +52,8 @@ defmodule Heroix.GameUninstaller do
       pid == uninstalling_pid ->
         log("Uninstall completed")
 
-        # update state
         new_state = Map.merge(state, %{uninstalling_pid: nil, uninstalling: nil})
 
-        # noreply and then broadcast uninstalled
         {:noreply, new_state, {:continue, {:broadcast_uninstalled, uninstalling_app_name}}}
 
       true ->
@@ -87,7 +84,6 @@ defmodule Heroix.GameUninstaller do
 
   defp initial_state() do
     %{
-      path: Legendary.bin_path(),
       uninstalling: nil,
       uninstalling_pid: nil
     }
@@ -99,11 +95,11 @@ defmodule Heroix.GameUninstaller do
   end
 
   # run legendary uninstall app, monitor process and return pid
-  defp uninstall(app_name, %{path: path}) do
+  defp uninstall(app_name) do
     args = ["-y", "uninstall", app_name]
     log("Uninstalling: #{app_name}")
 
-    {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
+    {:ok, pid, osPid} = @binary.run(args)
     log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid

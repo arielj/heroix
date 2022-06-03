@@ -15,3 +15,5 @@ config :phoenix, :plug_init_mode, :runtime
 
 config :heroix, legendary_config_path: Path.join([File.cwd!(), "test", "fixtures", "legendary"])
 config :heroix, heroix_config_path: Path.join([File.cwd!(), "test", "fixtures", "heroix"])
+config :heroix, legendary_bin_wrapper: Heroix.MockedLegendaryBin
+config :heroix, images_cache: Heroix.MockedImagesCache

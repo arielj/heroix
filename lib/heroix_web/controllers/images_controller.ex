@@ -1,8 +1,10 @@
 defmodule HeroixWeb.ImagesController do
   use HeroixWeb, :controller
 
+  @images_cache Application.fetch_env!(:heroix, :images_cache)
+
   def get(conn, %{"app_name" => app_name, "variant" => variant}) do
-    case Heroix.ImagesCache.get(app_name, variant) do
+    case @images_cache.get(app_name, variant) do
       nil ->
         halt(conn)
 

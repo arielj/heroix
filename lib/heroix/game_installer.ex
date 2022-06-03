@@ -2,7 +2,7 @@ defmodule Heroix.GameInstaller do
   use GenServer
   require Logger
 
-  alias Heroix.Legendary
+  @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
   @topic "game_status"
 
@@ -20,22 +20,21 @@ defmodule Heroix.GameInstaller do
 
   def init([]) do
     log("GenServer started")
-    # :exec.start_link([])
-    :exec.start_link([:debug])
     {:ok, initial_state()}
   end
 
   #### Trigger an async action, don't wait for result
 
-  # if nothing is being installed, install app_name
+  # if nothing is being installed, start installing app_name
   def handle_cast({:install, app_name}, state = %{installing: nil}) do
-    log("Install #{app_name}")
+    pid = install(app_name)
+    log("Install #{app_name} in pid #{pid_to_string(pid)}")
 
-    pid = install(app_name, state)
+    new_state = Map.merge(state, %{installing: app_name, installing_pid: pid})
 
     HeroixWeb.Endpoint.broadcast!(@topic, "installing", %{app_name: app_name})
 
-    {:noreply, Map.merge(state, %{installing: app_name, installing_pid: pid})}
+    {:noreply, new_state}
   end
 
   # if something is being installed, enqueue app_name
@@ -50,22 +49,22 @@ defmodule Heroix.GameInstaller do
   end
 
   # stop the current installation in progress
-  def handle_cast(:stop, state = %{installing_pid: pid, installing: installing_app_name}) do
-    log("Stop installation of #{installing_app_name}")
+  def handle_cast(
+        :stop,
+        state = %{installing_pid: pid, installing: app_name}
+      ) do
+    log("Stopping installation of #{app_name}")
 
-    :exec.kill(pid, :sigkill)
+    @binary.kill(pid)
 
-    HeroixWeb.Endpoint.broadcast!(@topic, "installation_stopped", %{app_name: installing_app_name})
-
-    {:noreply, Map.merge(state, %{installing: nil, installing_pid: nil}),
-     {:continue, {:remove_from_queue, installing_app_name}}}
+    {:noreply, Map.merge(state, %{stopping: app_name})}
   end
 
   #### Handle info messages sent by the legendary commands
 
-  # process legendary process output
-  def handle_info({std, _pid, msg}, state) when std in [:stdout, :stderr] do
-    log("[Legendary] #{msg}")
+  # process legendary output
+  def handle_info({std, pid, msg}, state) when std in [:stdout, :stderr] do
+    log("[Legendary] (#{pid}) #{msg}")
 
     %{installing: app_name} = state
     process_progress(msg, app_name)
@@ -73,14 +72,7 @@ defmodule Heroix.GameInstaller do
     {:noreply, state}
   end
 
-  # when installation is stopped by the user
-  def handle_info({:DOWN, _os_pid, :process, _pid, {:exit_status, 9}}, state) do
-    # %{installing: stopped_app_name} = state
-
-    {:noreply, state}
-  end
-
-  # # when installation is stopped by an exception in Legendary
+  # # when the installation is stopped by an exception in Legendary
   # def handle_info({:DOWN, _os_pid, :process, _pid, {:exit_status, 256}}, state) do
   #   %{installing: stopped_app_name} = state
 
@@ -89,28 +81,34 @@ defmodule Heroix.GameInstaller do
   #   {:noreply, state, {:continue, {:remove_from_queue, stopped_app_name}}}
   # end
 
-  # when legendary command ends normally
+  # when legendary command ends
   def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
     %{
       installing: installing_app_name,
-      installing_pid: installing_pid
+      installing_pid: installing_pid,
+      stopping: stopping_app_name
     } = state
 
-    # check if pid matches an installation or uninstallation pid
+    # check if the installation was stopped or completed
     cond do
+      installing_app_name == stopping_app_name ->
+        log("Installation of #{stopping_app_name} stopped by the user")
+
+        new_state = Map.merge(state, %{installing_pid: nil, installing: nil, stopped: nil})
+
+        HeroixWeb.Endpoint.broadcast!(@topic, "installation_stopped", %{
+          app_name: stopping_app_name
+        })
+
+        {:noreply, new_state, {:continue, {:remove_from_queue, stopping_app_name}}}
+
       pid == installing_pid ->
         log("Installation completed")
 
-        # update state
-        new_state =
-          Map.merge(state, %{
-            installing_pid: nil,
-            installing: nil
-          })
+        new_state = Map.merge(state, %{installing_pid: nil, installing: nil})
 
         HeroixWeb.Endpoint.broadcast!(@topic, "installed", %{app_name: installing_app_name})
 
-        # noreply and then broadcast installed
         {:noreply, new_state, {:continue, {:remove_from_queue, installing_app_name}}}
 
       true ->
@@ -149,7 +147,7 @@ defmodule Heroix.GameInstaller do
 
   def handle_continue({:install, app_to_install}, state) do
     install_game(app_to_install)
-    # log("Should install #{hd(queue)}")
+    # log("Should install #{app_to_install}")
     {:noreply, state}
   end
 
@@ -171,9 +169,9 @@ defmodule Heroix.GameInstaller do
 
   defp initial_state() do
     %{
-      path: Legendary.bin_path(),
       installing: nil,
       installing_pid: nil,
+      stopped: nil,
       queue: []
     }
   end
@@ -184,11 +182,11 @@ defmodule Heroix.GameInstaller do
   end
 
   # run legendary install app, monitor process and return pid
-  defp install(app_name, %{path: path}) do
+  defp install(app_name) do
     args = ["-y", "install", app_name]
     log("Installing: #{app_name}")
 
-    {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
+    {:ok, pid, osPid} = @binary.run(args)
     log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid

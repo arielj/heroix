@@ -168,6 +168,11 @@ defmodule HeroixWeb.GameView do
 
   #### handle GameInstaller broadcasted events
 
+  def handle_info(%{event: "enqueued"}, socket) do
+    {:noreply,
+     assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}
+  end
+
   def handle_info(%{event: "installing"}, socket) do
     {:noreply,
      assign(socket, installing: GameInstaller.installing(), install_queue: GameInstaller.queue())}

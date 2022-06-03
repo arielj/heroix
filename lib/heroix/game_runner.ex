@@ -2,9 +2,8 @@ defmodule Heroix.GameRunner do
   use GenServer
   require Logger
 
-  alias Heroix.Legendary
-
   @topic "game_status"
+  @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
   def running_game(), do: GenServer.call(GameRunner, :game_running)
   def launch_game(app_name), do: GenServer.cast(GameRunner, {:launch, app_name})
@@ -17,8 +16,6 @@ defmodule Heroix.GameRunner do
 
   def init([]) do
     log("GenServer started")
-    # :exec.start_link([:debug])
-    :exec.start_link([])
     {:ok, initial_state()}
   end
 
@@ -26,7 +23,7 @@ defmodule Heroix.GameRunner do
     args = ["launch", app_name]
     log("Launching game: #{path} #{Enum.join(args, " ")}")
 
-    {:ok, pid, osPid} = :exec.run([path | args], [:stdout, :stderr, :monitor])
+    {:ok, pid, osPid} = @binary.run(args)
     log("Running in pid: #{pid_to_string(pid)} (OS pid: #{osPid})")
 
     state =
@@ -44,7 +41,7 @@ defmodule Heroix.GameRunner do
   def handle_cast(:stop, state = %{game_pid: game_pid, app_name: app_name}) do
     log("Stopping #{app_name} (OS pid: #{game_pid})")
 
-    :exec.kill(game_pid, :sigkill)
+    @binary.kill(game_pid)
 
     {:noreply, state}
   end
@@ -104,7 +101,6 @@ defmodule Heroix.GameRunner do
 
   defp initial_state() do
     %{
-      path: Legendary.bin_path(),
       app_name: nil,
       args: [],
       game_pid: nil,
