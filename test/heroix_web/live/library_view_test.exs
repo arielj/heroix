@@ -159,7 +159,7 @@ defmodule HeroixWeb.LibraryViewTest do
 
   describe "uninstall button" do
     test "triggers the game uninstallation", %{conn: conn} do
-      {:ok, view, html} = live(conn, "/library/Godwit")
+      {:ok, view, _html} = live(conn, "/library/Godwit")
 
       view |> element("button", "Uninstall") |> render_click()
 

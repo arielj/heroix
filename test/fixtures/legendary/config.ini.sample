@@ -1,0 +1,93 @@
+[Legendary]
+log_level = debug
+; maximum shared memory (in MiB) to use for installation
+max_memory = 2048
+; maximum number of worker processes when downloading (fewer workers will be slower, but also use less system resources)
+max_workers = 8
+; default install directory
+install_dir = /mnt/tank/games
+; locale override, must be in RFC 1766 format (e.g. "en-US")
+locale = en-US
+; whether or not syncing with egl is enabled
+egl_sync = false
+; path to the "Manifests" folder in the EGL ProgramData directory
+egl_programdata = /home/user/Games/epic-games-store/drive_c/... 
+; Set preferred CDN host (e.g. to improve download speed)
+preferred_cdn = epicgames-download1.akamaized.net
+; disable HTTPS for downloads (e.g. to use a LanCache)
+disable_https = false
+; Disables the automatic update check
+disable_update_check = false
+; Disables the notice about an available update on exit
+disable_update_notice = false
+; Disable automatically-generated aliases
+disable_auto_aliasing = false
+
+; macOS specific settings
+; Default application platform to use (default: Mac on macOS, Windows elsewhere)
+default_platform = Windows
+; Fallback to "Windows" platform if native version unavailable
+install_platform_fallback = true
+; (macOS) Disable automatic CrossOver use
+disable_auto_crossover = false
+; Default directory for native Mac applications (.app packages)
+mac_install_dir = /User/legendary/Applications
+
+[Legendary.aliases]
+; List of aliases for simpler CLI use, in the format `<alias> = <app name>`
+HITMAN 3 = Eider
+gtav = 9d2d0eb64d5c44529cece33fe2a46482
+
+; default settings to use for all apps (unless overridden in the app's config section)
+; Note that only the settings listed below are supported.
+[default]
+; (all) wrapper to run the game with (e.g. "gamemode")
+wrapper = gamemode
+; (linux/macOS) Wine executable and prefix
+wine_executable = wine
+wine_prefix = /home/user/.wine
+; (macOS) CrossOver options
+crossover_app = /Applications/CrossOver.app
+crossover_bottle = Legendary
+
+; default environment variables to set (overridden by game specific ones)
+[default.env]
+WINEPREFIX = /home/user/legendary/.wine
+
+; Settings to only use for "AppName"
+[AppName]
+; launch game without online authentication by default
+offline = true
+; Skip checking for updates when launching this game
+skip_update_check = true
+; start parameters to use (in addition to the required ones)
+start_params = -windowed
+; override language with two-letter language code
+language = fr
+; Override Wine version for this app
+wine_executable = /path/to/wine64
+
+[AppName.env]
+; environment variables to set for this game (mostly useful on linux)
+WINEPREFIX = /mnt/tank/games/Game/.wine
+DXVK_CONFIG_FILE = /mnt/tank/games/Game/dxvk.conf
+
+[AppName2]
+; Use a wrapper to run this script
+; Note that the path might have to be quoted if it contains spaces
+wrapper = "/path/with spaces/gamemoderun"
+; Do not run this executable with WINE (e.g. when the wrapper handles that)
+no_wine = true
+; Override the executable launched for this game, for example to bypass a launcher (e.g. Borderlands)
+override_exe = relative/path/to/file.exe
+; Disable selective downloading for this title
+disable_sdl = true
+
+[AppName3]
+; Command to run before launching the gmae
+pre_launch_command = /path/to/script.sh
+; Whether or not to wait for command to finish running
+pre_launch_wait = false
+; (macOS) override crossover settings
+crossover_app = /Applications/CrossOver Nightly.app
+crossover_bottle = SomethingElse
