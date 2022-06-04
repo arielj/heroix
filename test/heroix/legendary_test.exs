@@ -171,4 +171,19 @@ defmodule Heroix.LegendaryTest do
 
     File.rm(@config_ini)
   end
+
+  test "ignores empty configurations" do
+    config_content = """
+    [default]
+    wrapper = gamemode
+    """
+
+    Legendary.write_config(%{"default" => %{"wrapper" => "gamemode", "wine" => ""}})
+
+    {:ok, body} = File.read(@config_ini)
+
+    assert body == config_content
+
+    File.rm(@config_ini)
+  end
 end

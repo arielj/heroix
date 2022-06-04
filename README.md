@@ -41,20 +41,29 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Game view (some info, install/uninstall, launch/stop actions)
 - - State is reactive to running games and installing/uninstalling them
 - Settings view (basic skeleton to handle global settings)
-- Basic install queue (no view yet)
 - Images cache
-- Installation progress in game view
+- Install / stop install
+- Installation progress in game screen and downloads screen
+- Uninstall
+- Enqueue games to download
+
+## WIP
+
+- Install queue visualizer (needs more details on each game in the list, does not show available updates, would be nice to keep a log of finished/stopped installations)
+- Cancel installation (can be stopped, but needs more details)
+- Resume installation (it can be resumed by default, files are kept automatically)
+- Save game config in Legendary's config.ini (config.ini gets updated, no UI to change the settings yet)
 
 ## TODO
 
 - Install dialog (with installation configuration)
-- Cancel installation (can be stopped, but needs more details)
-- Resume installation (it can be resumed by default, files are kept automatically)
-- Install queue visualizer (display game being installed, games in the queue, games with updates available)
+- Import
+- Update
+- Delete partial installation
 - Visual hints for games in queue and installing in library
-- Save game config in Legendary's config.ini
 - Installation-related settings (install folder, more?)
-- Game launch-related settings (wine, prefix)
+- UI to change legendary's config (legendary and defaults)
+- UI to change game's legendary config
 - Login
 - Refresh action
 - Wine downloader
@@ -64,11 +73,12 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Themes
 - Cloud saves
 - elixir-desktop stuff (standalone app, tray icon)
-- Customize launch command
-- Pre/Post game scripts
+- Customize launch command? can use legendary config for this
+- Pre/Post game scripts (pre script is a legendary feature!)
 - Game OS version picker (Mac/Windows)
 - Game versions configuration (install older version?)
 - GOG integration
+- Add custom games (title, image, executable?)
 
 ## Links
 

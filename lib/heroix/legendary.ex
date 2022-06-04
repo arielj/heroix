@@ -33,7 +33,7 @@ defmodule Heroix.Legendary do
         process_first_line(lines, %{})
 
       _ ->
-        IO.inspect("errorrrr")
+        %{}
     end
   end
 
@@ -104,7 +104,13 @@ defmodule Heroix.Legendary do
 
     content =
       ["Legendary" | ["default" | keys]]
-      |> Enum.map(fn key -> "[#{key}]\n#{config_to_string(config_map[key], key)}" end)
+      |> Enum.map(fn key ->
+        case config_map[key] do
+          nil -> nil
+          config -> "[#{key}]\n#{config_to_string(config, key)}"
+        end
+      end)
+      |> Enum.reject(fn x -> is_nil(x) end)
       |> Enum.join("\n\n")
 
     File.write(config_ini_path(), content <> "\n")
@@ -117,15 +123,18 @@ defmodule Heroix.Legendary do
       pairs
       |> Enum.filter(fn {_, value} -> is_binary(value) end)
       |> Enum.map(fn {config_key, value} ->
-        value =
-          if String.contains?(value, " ") do
-            "\"#{value}\""
-          else
-            value
-          end
+        cond do
+          String.trim(value) == "" ->
+            nil
 
-        "#{config_key} = #{value}"
+          String.contains?(value, " ") ->
+            "#{config_key} = \"#{value}\""
+
+          true ->
+            "#{config_key} = #{value}"
+        end
       end)
+      |> Enum.reject(fn x -> is_nil(x) end)
       |> Enum.join("\n")
 
     case Enum.filter(pairs, fn {_, value} -> is_map(value) end) do

@@ -38,7 +38,12 @@ defmodule Heroix.Settings do
 
   def handle_call({:legendary_game_config, app_name}, _from, state) do
     %{legendary: legendary_settings} = state
-    app_settings = legendary_settings[app_name] || %{}
+
+    app_settings =
+      case Map.fetch(legendary_settings, app_name) do
+        {:ok, value} -> value
+        _ -> %{}
+      end
 
     {:reply, app_settings, state}
   end
