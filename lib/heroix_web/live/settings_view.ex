@@ -16,7 +16,7 @@ defmodule HeroixWeb.SettingsView do
     langs = @langs
 
     ~H"""
-    <div id="global_settings">
+    <section id="global_settings">
       <form phx-change="change">
         <div class="input-field">
           <label for="language"><%= gettext("Language") %></label>
@@ -32,7 +32,7 @@ defmodule HeroixWeb.SettingsView do
           <input phx-blur="blur" type="text" value={@settings["default_install_path"]} id="default_install_path" name="default_install_path" />
         </div>
       </form>
-    </div>
+    </section>
     """
   end
 

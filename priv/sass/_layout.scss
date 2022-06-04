@@ -23,6 +23,9 @@ body {
   main {
     overflow: auto;
     background: var(--main-bkg);
-    padding: 1rem;
+    & > section {
+      padding: 1rem;
+      min-height: 100%;
+    }
   }
 }

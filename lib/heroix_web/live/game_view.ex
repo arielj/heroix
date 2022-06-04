@@ -5,8 +5,10 @@ defmodule HeroixWeb.GameView do
   alias Heroix.GameRunner
   alias Heroix.GameInstaller
   alias Heroix.GameUninstaller
+  alias Heroix.Settings
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
+  import HeroixWeb.GameConfigComponent
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
@@ -24,7 +26,9 @@ defmodule HeroixWeb.GameView do
        installing: GameInstaller.installing(),
        install_queue: GameInstaller.queue(),
        install_progress: nil,
-       install_eta: nil
+       install_eta: nil,
+       legendary_config: Settings.legendary_game_config(app_name),
+       show_config: false
      )}
   end
 
@@ -73,7 +77,7 @@ defmodule HeroixWeb.GameView do
 
   def render(assigns) do
     ~H"""
-    <div id="game">
+    <section id="game" class={@show_config && "show-config"}>
       <div class="left">
         <.game_image game={@game} />
         <div class="actions">
@@ -122,6 +126,7 @@ defmodule HeroixWeb.GameView do
               <% end %>
             <% end %>
           <% end %>
+          <button id="game-config__toggle" phx-click="toggle-config">Config</button>
         </div>
       </div>
       <div class="right">
@@ -129,7 +134,8 @@ defmodule HeroixWeb.GameView do
         <p class="description"><%= @game["metadata"]["description"] %></p>
         <.info game={@game} />
       </div>
-    </div>
+      <.game_config config={@legendary_config} />
+    </section>
     """
   end
 
@@ -158,6 +164,10 @@ defmodule HeroixWeb.GameView do
   def handle_event("stop-installation", %{}, socket) do
     GameInstaller.stop_installation()
     {:noreply, socket}
+  end
+
+  def handle_event("toggle-config", %{}, socket) do
+    {:noreply, assign(socket, :show_config, !socket.assigns.show_config)}
   end
 
   #### handle GameRunner broadcasted messages

@@ -4,6 +4,18 @@ defmodule Heroix.Settings do
 
   # @pubsub_topic "settings"
 
+  def legendary_game_config(app_name) do
+    GenServer.call(Settings, {:legendary_game_config, app_name})
+  end
+
+  def set_legendary_game_config(app_name, key, value, save) do
+    GenServer.call(Settings, {:set_legendary_game_config, app_name, key, value, save})
+  end
+
+  def set_legendary_game_env(app_name, key, value, save) do
+    GenServer.call(Settings, {:set_legendary_game_config, app_name, {"env", key}, value, save})
+  end
+
   def start_link(options) do
     log("GenServer starting")
     GenServer.start_link(__MODULE__, [], options)
@@ -14,7 +26,8 @@ defmodule Heroix.Settings do
 
     state = initial_state()
     global = Map.merge(state.global, read_global_settings())
-    state = Map.put(initial_state(), :global, global)
+    legendary = Heroix.Legendary.read_config()
+    state = Map.merge(initial_state(), %{global: global, legendary: legendary})
 
     {:ok, state}
   end
@@ -23,15 +36,45 @@ defmodule Heroix.Settings do
     {:reply, global_settings, state}
   end
 
+  def handle_call({:legendary_game_config, app_name}, _from, state) do
+    %{legendary: legendary_settings} = state
+    app_settings = legendary_settings[app_name] || %{}
+
+    {:reply, app_settings, state}
+  end
+
+  def handle_call({:set_legendary_game_config, app_name, key, value, save: save}, _from, state) do
+    %{legendary: legendary_config} = state
+    app_config = legendary_config[app_name] || %{}
+
+    new_app_config =
+      case key do
+        {"env", config_key} ->
+          env = app_config["env"] || %{}
+          new_env = Map.put(env, config_key, value)
+          Map.put(app_config, "env", new_env)
+
+        _ ->
+          Map.put(app_config, key, value)
+      end
+
+    new_legendary_config = Map.put(legendary_config, app_name, new_app_config)
+    new_state = Map.put(state, :legendary, new_legendary_config)
+
+    if save, do: Heroix.Legendary.write_config(new_legendary_config)
+
+    {:reply, new_app_config, new_state}
+  end
+
   def handle_call({:set_global, key, value, save: save}, _from, state) do
     %{global: global_settings} = state
 
     new_global = Map.put(global_settings, key, value)
-    state = Map.put(state, :global, new_global)
+    new_state = Map.put(state, :global, new_global)
 
     if save, do: write_global_settings(new_global)
 
-    {:reply, new_global, state}
+    {:reply, new_global, new_state}
   end
 
   def handle_cast(:save_global, state = %{global: global_settings}) do
@@ -54,7 +97,8 @@ defmodule Heroix.Settings do
       global: %{
         "language" => "en",
         "default_install_path" => ""
-      }
+      },
+      legendary: %{}
     }
   end
 

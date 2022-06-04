@@ -21,7 +21,7 @@ defmodule HeroixWeb.DownloadsView do
 
   def render(assigns) do
     ~H"""
-    <div id="downloads">
+    <section id="downloads">
       <h1>Downloads</h1>
       <%= if @installing do %>
         <div>
@@ -37,7 +37,7 @@ defmodule HeroixWeb.DownloadsView do
           <label><%= game %></label>
         </div>
       <% end %>
-    </div>
+    </section>
     """
   end
 
