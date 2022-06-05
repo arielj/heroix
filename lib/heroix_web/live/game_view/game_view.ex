@@ -26,7 +26,7 @@ defmodule HeroixWeb.GameView do
        install_queue: GameInstaller.queue(),
        install_progress: nil,
        install_eta: nil,
-       show_config: true
+       show_config: false
      )}
   end
 
@@ -126,7 +126,10 @@ defmodule HeroixWeb.GameView do
               <% end %>
             <% end %>
           <% end %>
-          <button id="game-config__toggle" phx-click="toggle-config">Config</button>
+          <button id="game-config__toggle" phx-click="toggle-config">
+            <%= if @show_config, do: "Close" %>
+            Config
+          </button>
         </div>
       </div>
       <div class="right">

@@ -53,9 +53,12 @@
     background: black;
     color: white;
     width: clamp(300px, 40vw, 600px);
+    overflow-y: auto;
   }
 
-  &.show-config #game-config {
-    transform: translate(0);
+  &.show-config {
+    #game-config {
+      transform: translate(0);
+    }
   }
 }

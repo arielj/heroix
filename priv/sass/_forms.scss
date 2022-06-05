@@ -1,12 +1,12 @@
 .form-field {
   display: flex;
 
-  &.text-field {
+  &.text-field,
+  &.yes-no-field {
     flex-direction: column;
   }
 
-  .hint,
-  .default {
+  .hint {
     font-size: 0.8rem;
   }
 }
