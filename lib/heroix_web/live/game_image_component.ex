@@ -1,5 +1,5 @@
 defmodule HeroixWeb.GameImageComponent do
-  use Phoenix.Component
+  use HeroixWeb, :component
 
   def game_image(assigns) do
     app_name = assigns.game["app_name"]

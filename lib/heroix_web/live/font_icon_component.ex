@@ -1,5 +1,5 @@
 defmodule HeroixWeb.FontIconComponent do
-  use Phoenix.Component
+  use HeroixWeb, :component
 
   def font_icon(assigns) do
     ~H"""

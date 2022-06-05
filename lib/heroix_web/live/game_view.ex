@@ -5,10 +5,9 @@ defmodule HeroixWeb.GameView do
   alias Heroix.GameRunner
   alias Heroix.GameInstaller
   alias Heroix.GameUninstaller
-  alias Heroix.Settings
+  alias HeroixWeb.GameConfigComponent
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
-  import HeroixWeb.GameConfigComponent
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
@@ -27,8 +26,7 @@ defmodule HeroixWeb.GameView do
        install_queue: GameInstaller.queue(),
        install_progress: nil,
        install_eta: nil,
-       legendary_config: Settings.legendary_game_config(app_name),
-       show_config: false
+       show_config: true
      )}
   end
 
@@ -76,13 +74,15 @@ defmodule HeroixWeb.GameView do
   end
 
   def render(assigns) do
+    app_name = assigns.game["app_name"]
+
     ~H"""
     <section id="game" class={@show_config && "show-config"}>
       <div class="left">
         <.game_image game={@game} />
         <div class="actions">
           <%= if @game["install_info"] != nil do %>
-            <%= if @game_running == @game["app_name"] do %>
+            <%= if @game_running == app_name do %>
               <button phx-click="stop">
                 <.font_icon icon="stop" />
                 Stop
@@ -105,7 +105,7 @@ defmodule HeroixWeb.GameView do
               Uninstall
             </button>
           <% else %>
-            <%= if @installing == @game["app_name"] do %>
+            <%= if @installing == app_name do %>
               <%= if @install_progress && @install_eta do %>
                 Installing <%= @install_progress %>% (ETA: <%= @install_eta %>)
               <% else %>
@@ -116,7 +116,7 @@ defmodule HeroixWeb.GameView do
                 Stop Installation
               </button>
             <% else %>
-              <%= if Enum.member?(@install_queue, @game["app_name"]) do %>
+              <%= if Enum.member?(@install_queue, app_name) do %>
                 In install queue
               <% else %>
                 <button phx-click="install">
@@ -134,7 +134,7 @@ defmodule HeroixWeb.GameView do
         <p class="description"><%= @game["metadata"]["description"] %></p>
         <.info game={@game} />
       </div>
-      <.game_config config={@legendary_config} />
+      <.live_component module={GameConfigComponent} id={"game-config:#{app_name}"} app_name={app_name} />
     </section>
     """
   end

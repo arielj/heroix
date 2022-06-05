@@ -52,6 +52,7 @@
     padding: 1rem;
     background: black;
     color: white;
+    width: clamp(300px, 40vw, 600px);
   }
 
   &.show-config #game-config {

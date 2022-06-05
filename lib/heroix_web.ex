@@ -63,6 +63,8 @@ defmodule HeroixWeb do
     quote do
       use Phoenix.Component
 
+      import HeroixWeb.Gettext
+
       unquote(view_helpers())
     end
   end

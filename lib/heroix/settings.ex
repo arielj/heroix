@@ -16,6 +16,8 @@ defmodule Heroix.Settings do
     GenServer.call(Settings, {:set_legendary_game_config, app_name, {"env", key}, value, save})
   end
 
+  def save_legendary_config(), do: GenServer.cast(Settings, :save_legendary_config)
+
   def start_link(options) do
     log("GenServer starting")
     GenServer.start_link(__MODULE__, [], options)
@@ -48,7 +50,7 @@ defmodule Heroix.Settings do
     {:reply, app_settings, state}
   end
 
-  def handle_call({:set_legendary_game_config, app_name, key, value, save: save}, _from, state) do
+  def handle_call({:set_legendary_game_config, app_name, key, value, save}, _from, state) do
     %{legendary: legendary_config} = state
     app_config = legendary_config[app_name] || %{}
 
@@ -84,6 +86,12 @@ defmodule Heroix.Settings do
 
   def handle_cast(:save_global, state = %{global: global_settings}) do
     write_global_settings(global_settings)
+
+    {:noreply, state}
+  end
+
+  def handle_cast(:save_legendary_config, state = %{legendary: legendary_config}) do
+    Heroix.Legendary.write_config(legendary_config)
 
     {:noreply, state}
   end

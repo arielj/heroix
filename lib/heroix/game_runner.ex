@@ -20,9 +20,9 @@ defmodule Heroix.GameRunner do
     {:ok, initial_state()}
   end
 
-  def handle_cast({:launch, app_name}, state = %{path: path}) do
+  def handle_cast({:launch, app_name}, state) do
     args = ["launch", app_name]
-    log("Launching game: #{path} #{Enum.join(args, " ")}")
+    log("Launching game with: #{Enum.join(args, " ")}")
 
     {:ok, pid, osPid} = @binary.run(args)
     log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
@@ -128,7 +128,7 @@ defmodule Heroix.GameRunner do
     output
     |> String.split("\n")
     |> Enum.filter(fn line -> line =~ ~r/-epicapp=#{app_name}/ end)
-    |> List.first()
+    |> List.first() || "1"
   end
 
   defp extract_pid(line) do

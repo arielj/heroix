@@ -1,0 +1,16 @@
+.form-field {
+  display: flex;
+
+  &.text-field {
+    flex-direction: column;
+  }
+
+  .hint,
+  .default {
+    font-size: 0.8rem;
+  }
+}
+
+form .form-field {
+  margin-bottom: 1rem;
+}
