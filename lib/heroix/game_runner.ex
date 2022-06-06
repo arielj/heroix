@@ -69,7 +69,7 @@ defmodule Heroix.GameRunner do
       log("In process: #{game_pid}")
 
       # monitor OS process
-      :exec.manage(game_pid, [:monitor])
+      :exec.manage(game_pid, [:stderr, :stdout, :monitor])
 
       {:noreply, Map.put(state, :game_pid, game_pid)}
     else

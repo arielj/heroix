@@ -84,7 +84,7 @@ defmodule Heroix.GameInstaller do
     %{
       installing: installing_app_name,
       installing_pid: installing_pid,
-      stopping: stopping_app_name
+      stopped: stopping_app_name
     } = state
 
     # check if the installation was stopped or completed
