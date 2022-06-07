@@ -53,19 +53,19 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Install queue visualizer (needs more details on each game in the list, does not show available updates, would be nice to keep a log of finished/stopped installations)
 - Cancel installation (can be stopped, but needs more details)
 - Resume installation (it can be resumed by default, files are kept automatically)
+- Installation-related settings (install folder, more?)
+- UI to change legendary's config (legendary and defaults)
+- UI to change game's legendary config
 
 ## TODO
 
 - Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables
-- Install dialog (with installation configuration)
+- Install dialog (with installation configuration and details)
 - Import
-- Update
+- Update (dialog with details)
 - Delete partial installation
 - Visual hints for games in queue and installing in library
-- Installation-related settings (install folder, more?)
-- UI to change legendary's config (legendary and defaults)
-- UI to change game's legendary config
 - Login
 - Refresh action
 - Wine downloader
@@ -74,8 +74,9 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - A11y
 - Themes
 - Cloud saves
+- hide games
+- game categories
 - elixir-desktop stuff (standalone app, tray icon)
-- Customize launch command? can use legendary config for this
 - Pre/Post game scripts (pre script is a legendary feature!)
 - Game OS version picker (Mac/Windows)
 - Game versions configuration (install older version?)

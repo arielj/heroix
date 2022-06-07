@@ -91,7 +91,7 @@ defmodule HeroixWeb.GameView do
               <%= if @game_running == nil do %>
                 <button phx-click="launch">
                   <.font_icon icon="play-alt-1" />
-                  Lunch
+                  Launch
                 </button>
               <% else %>
                 <p>
