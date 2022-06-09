@@ -1,0 +1,12 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+
+  &-content {
+    margin: auto;
+    background: white;
+    padding: 1rem;
+  }
+}

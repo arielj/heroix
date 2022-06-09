@@ -1,4 +1,6 @@
 defmodule Heroix.Legendary do
+  @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
+
   def owned_games do
     installed_info = installed_games()
 
@@ -14,7 +16,7 @@ defmodule Heroix.Legendary do
 
       {:ok, json} ->
         %{"app_name" => app_name} = json
-        json = Map.put(json, "install_info", installed_games()[app_name])
+        json = Map.put(json, "installed_info", installed_games()[app_name])
         {:ok, json}
     end
   end
@@ -34,6 +36,18 @@ defmodule Heroix.Legendary do
 
       _ ->
         %{}
+    end
+  end
+
+  def game_install_info(app_name) do
+    with {:ok, [stdout: output, stderr: _]} <-
+           @binary.run(["info", app_name, "--json"], [:sync]),
+         output <- Enum.join(output, " "),
+         {:ok, json} <-
+           Jason.decode(output) do
+      json
+    else
+      {:error, err} -> err
     end
   end
 
@@ -156,7 +170,7 @@ defmodule Heroix.Legendary do
     case Heroix.get_json(filename) do
       {:ok, json} ->
         %{"app_name" => app_name} = json
-        json = Map.put(json, "install_info", installed_info[app_name])
+        json = Map.put(json, "installed_info", installed_info[app_name])
         {app_name, json}
 
       {:error, :enoent} ->

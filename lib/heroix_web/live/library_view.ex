@@ -47,7 +47,7 @@ defmodule HeroixWeb.LibraryView do
       <.header games_list={@games_list} search_term={@search_term} />
       <ul id="games_list">
         <%= for game <- @games_list do %>
-          <li><.game_card game={game} installed={game["install_info"] != nil} /></li>
+          <li><.game_card game={game} installed={game["installed_info"] != nil} /></li>
         <% end %>
       </ul>
     </section>
@@ -100,7 +100,7 @@ defmodule HeroixWeb.LibraryView do
   end
 
   defp installed_first(games) do
-    Enum.sort(games, fn %{"install_info" => installed1}, %{"install_info" => installed2} ->
+    Enum.sort(games, fn %{"installed_info" => installed1}, %{"installed_info" => installed2} ->
       cond do
         installed1 && installed2 -> true
         installed1 && !installed2 -> true

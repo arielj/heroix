@@ -1,11 +1,14 @@
 defmodule HeroixWeb.GameView do
   use HeroixWeb, :live_view
 
+  require Logger
+
   alias Heroix.Legendary
   alias Heroix.GameRunner
   alias Heroix.GameInstaller
   alias Heroix.GameUninstaller
   alias HeroixWeb.GameConfigComponent
+  alias HeroixWeb.AddGameDialogComponent
   import HeroixWeb.GameImageComponent
   import HeroixWeb.FontIconComponent
 
@@ -15,6 +18,10 @@ defmodule HeroixWeb.GameView do
 
     # subscribe to game status updates
     HeroixWeb.Endpoint.subscribe("game_status")
+
+    if !game_info["installed_info"] do
+      GameInstaller.fetch_install_info(app_name)
+    end
 
     {:ok,
      assign(socket,
@@ -26,6 +33,8 @@ defmodule HeroixWeb.GameView do
        install_queue: GameInstaller.queue(),
        install_progress: nil,
        install_eta: nil,
+       install_info: nil,
+       show_add_game: false,
        show_config: false
      )}
   end
@@ -44,7 +53,7 @@ defmodule HeroixWeb.GameView do
   end
 
   def info(assigns) do
-    install_info = assigns.game["install_info"]
+    installed_info = assigns.game["installed_info"]
     metadata = assigns.game["metadata"]
     release_date = hd(metadata["releaseInfo"])["dateAdded"]
     last_update_at = metadata["lastModifiedDate"]
@@ -53,11 +62,11 @@ defmodule HeroixWeb.GameView do
     <dl class="info">
       <dt>Version</dt>
       <dd><%= @game["app_version"] || "Unknown" %></dd>
-      <%= if install_info do %>
+      <%= if installed_info do %>
         <dt>Install Path</dt>
-        <dd><%= install_info["install_path"] %></dd>
+        <dd><%= installed_info["install_path"] %></dd>
         <dt>Size in Disk</dt>
-        <dd><%= Heroix.bytes_to_human(install_info["install_size"]) %></dd>
+        <dd><%= Heroix.bytes_to_human(installed_info["install_size"]) %></dd>
       <% end %>
       <dt>Developer</dt>
       <dd><%= metadata["developer"] %></dd>
@@ -81,7 +90,7 @@ defmodule HeroixWeb.GameView do
       <div class="left">
         <.game_image game={@game} />
         <div class="actions">
-          <%= if @game["install_info"] != nil do %>
+          <%= if @game["installed_info"] != nil do %>
             <%= if @game_running == app_name do %>
               <button phx-click="stop">
                 <.font_icon icon="stop" />
@@ -119,9 +128,9 @@ defmodule HeroixWeb.GameView do
               <%= if Enum.member?(@install_queue, app_name) do %>
                 In install queue
               <% else %>
-                <button phx-click="install">
+                <button phx-click="add-game">
                   <.font_icon icon="database-add" />
-                  Install
+                  Add Game
                 </button>
               <% end %>
             <% end %>
@@ -138,39 +147,54 @@ defmodule HeroixWeb.GameView do
         <.info game={@game} />
       </div>
       <.live_component module={GameConfigComponent} id={"game-config:#{app_name}"} app_name={app_name} />
+      <%= if @show_add_game do %>
+        <.live_component module={AddGameDialogComponent} id={"add-game:#{app_name}"} game_info={@game} install_info={@install_info} />
+      <% end %>
     </section>
     """
   end
 
   #### Handle events triggered by the user
 
-  def handle_event("launch", %{}, socket) do
+  def handle_event("launch", _, socket) do
     GameRunner.launch_game(socket.assigns.app_name)
     {:noreply, socket}
   end
 
-  def handle_event("stop", %{}, socket) do
+  def handle_event("stop", _, socket) do
     GameRunner.stop_game()
     {:noreply, socket}
   end
 
-  def handle_event("install", %{}, socket) do
-    GameInstaller.install_game(socket.assigns.app_name)
-    {:noreply, socket}
+  def handle_event("add-game", _, socket) do
+    {:noreply, assign(socket, :show_add_game, true)}
   end
 
-  def handle_event("uninstall", %{}, socket) do
+  def handle_event("uninstall", _, socket) do
     GameUninstaller.uninstall_game(socket.assigns.app_name)
     {:noreply, socket}
   end
 
-  def handle_event("stop-installation", %{}, socket) do
+  def handle_event("stop-installation", _, socket) do
     GameInstaller.stop_installation()
     {:noreply, socket}
   end
 
-  def handle_event("toggle-config", %{}, socket) do
+  def handle_event("toggle-config", _, socket) do
     {:noreply, assign(socket, :show_config, !socket.assigns.show_config)}
+  end
+
+  def handle_event("confirm-install", _data, socket) do
+    GameInstaller.install_game(socket.assigns.game["app_name"])
+    {:noreply, assign(socket, :show_add_game, false)}
+  end
+
+  def handle_event("cancel-install", _data, socket) do
+    {:noreply, assign(socket, :show_add_game, false)}
+  end
+
+  def handle_event("add-game-closed", _, socket) do
+    {:noreply, assign(socket, :show_add_game, false)}
   end
 
   #### handle GameRunner broadcasted messages
@@ -234,6 +258,20 @@ defmodule HeroixWeb.GameView do
     end
   end
 
+  def handle_info(%{event: "install_info_ready", payload: payload}, socket) do
+    %{app_name: app_name, install_info: install_info} = payload
+
+    if socket.assigns.show_add_game do
+      send_update(AddGameDialogComponent,
+        id: "add-game:#{app_name}",
+        install_info: install_info,
+        game_info: socket.assigns.game
+      )
+    end
+
+    {:noreply, assign(socket, :install_info, install_info)}
+  end
+
   #### handle GameUninstaller broadcasted events
 
   def handle_info(%{event: "uninstalling"}, socket) do
@@ -250,7 +288,11 @@ defmodule HeroixWeb.GameView do
   end
 
   def handle_info(event, socket) do
-    IO.inspect("Unhandled info: #{inspect(event)}")
+    log("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
+  end
+
+  defp log(msg) do
+    Logger.info("[GameView] #{String.trim(msg)}")
   end
 end

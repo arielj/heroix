@@ -17,7 +17,8 @@ defmodule Heroix.Application do
       {Heroix.GameRunner, name: GameRunner},
       {Heroix.Settings, name: Settings},
       {Heroix.GameInstaller, name: GameInstaller},
-      {Heroix.GameUninstaller, name: GameUninstaller}
+      {Heroix.GameUninstaller, name: GameUninstaller},
+      {Task.Supervisor, name: Task.MySupervisor}
       # Start a worker by calling: Heroix.Worker.start_link(arg)
       # {Heroix.Worker, arg}
     ]

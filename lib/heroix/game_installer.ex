@@ -10,6 +10,10 @@ defmodule Heroix.GameInstaller do
   def install_game(app_name), do: GenServer.cast(GameInstaller, {:install, app_name})
   def update_game(app_name), do: GenServer.cast(GameInstaller, {:update, app_name})
   def stop_installation(), do: GenServer.cast(GameInstaller, :stop)
+
+  def fetch_install_info(app_name),
+    do: GenServer.cast(GameInstaller, {:fetch_install_info, app_name})
+
   def reset(), do: GenServer.call(GameInstaller, :reset)
   def installing(), do: GenServer.call(GameInstaller, :installing)
   def queue(), do: GenServer.call(GameInstaller, :queue)
@@ -58,6 +62,21 @@ defmodule Heroix.GameInstaller do
     {:noreply, Map.merge(state, %{stopping: app_name})}
   end
 
+  def handle_cast({:fetch_install_info, app_name}, state) do
+    Task.Supervisor.async_nolink(Task.MySupervisor, fn ->
+      install_info = Heroix.Legendary.game_install_info(app_name)
+
+      HeroixWeb.Endpoint.broadcast!(@topic, "install_info_ready", %{
+        app_name: app_name,
+        install_info: install_info
+      })
+
+      {:install_info_ready}
+    end)
+
+    {:noreply, state}
+  end
+
   #### Handle info messages sent by the legendary commands
 
   # process legendary output
@@ -79,6 +98,11 @@ defmodule Heroix.GameInstaller do
   #   {:noreply, state, {:continue, {:remove_from_queue, stopped_app_name}}}
   # end
 
+  # the fetch install info task is terminated, do nothing
+  def handle_info({:DOWN, ref, :process, _pid, :normal}, state) when is_reference(ref) do
+    {:noreply, state}
+  end
+
   # when legendary command ends
   def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
     %{
@@ -89,7 +113,7 @@ defmodule Heroix.GameInstaller do
 
     # check if the installation was stopped or completed
     cond do
-      installing_app_name == stopping_app_name ->
+      installing_app_name && installing_app_name == stopping_app_name ->
         log("Installation of #{stopping_app_name} stopped by the user")
 
         new_state = Map.merge(state, %{installing_pid: nil, installing: nil, stopped: nil})
@@ -100,7 +124,7 @@ defmodule Heroix.GameInstaller do
 
         {:noreply, new_state, {:continue, {:remove_from_queue, stopping_app_name}}}
 
-      pid == installing_pid ->
+      installing_pid && pid == installing_pid ->
         log("Installation completed")
 
         new_state = Map.merge(state, %{installing_pid: nil, installing: nil})
@@ -113,6 +137,11 @@ defmodule Heroix.GameInstaller do
         log("Unknown process DOWN #{inspect(msg)}")
         {:noreply, state}
     end
+  end
+
+  # fetch install info async task finished, do nothing
+  def handle_info({_ref, {:install_info_ready}}, state) do
+    {:noreply, state}
   end
 
   def handle_info(msg, state) do

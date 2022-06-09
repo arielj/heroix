@@ -1,0 +1,68 @@
+{
+  "game": {
+    "app_name": "Snapdragon",
+    "title": "Metro Exodus",
+    "version": "0.1.0.40",
+    "platform_versions": { "Mac": "0.2.0.61", "Windows": "0.1.0.40" },
+    "cloud_saves_supported": true,
+    "cloud_save_folder": "{UserSavedGames}/metro exodus/{EpicID}/",
+    "cloud_save_folder_mac": null,
+    "is_dlc": false,
+    "external_activation": null,
+    "launch_options": [],
+    "owned_dlc": [
+      {
+        "app_name": "SnapdragonDLC2",
+        "title": "Sam's Story",
+        "installable": [
+          {
+            "id": "0c57af95748a46ac9a1c2cafba7038ce",
+            "appId": "SnapdragonDLC2",
+            "compatibleApps": [],
+            "platform": ["Windows", "Mac"],
+            "dateAdded": "2019-05-14T00:00:00.000Z",
+            "releaseNote": "",
+            "versionTitle": ""
+          }
+        ],
+        "id": "9ea8124c525944f6a63a1ed2cb216ad0"
+      },
+      {
+        "app_name": "SnapdragonDLC1",
+        "title": "The Two Colonels",
+        "installable": [
+          {
+            "id": "9051ff62d05045738547455655c4ee18",
+            "appId": "SnapdragonDLC1",
+            "compatibleApps": [],
+            "platform": ["Windows", "Mac"],
+            "dateAdded": "2019-05-08T00:00:00.000Z",
+            "releaseNote": "",
+            "versionTitle": ""
+          }
+        ],
+        "id": "ac45944a87834615909cde9de0a46853"
+      }
+    ]
+  },
+  "install": null,
+  "manifest": {
+    "size": 4534189,
+    "type": "binary",
+    "version": 17,
+    "feature_level": 17,
+    "app_name": "SnapdragonQA",
+    "launch_exe": "MetroExodus.exe",
+    "launch_command": "",
+    "build_version": "0.1.0.40",
+    "build_id": "2jQkNXh6CZYZWPfhGu1u4Uwmzrk",
+    "prerequisites": null,
+    "install_tags": [""],
+    "num_files": 112,
+    "num_chunks": 67441,
+    "disk_size": 75257313942,
+    "download_size": 64667595436,
+    "tag_disk_size": [],
+    "tag_download_size": []
+  }
+}

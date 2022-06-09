@@ -5,9 +5,11 @@ defmodule Heroix.LegendaryBin do
     :exec.run([bin_path() | args], [:stdout, :stderr, :monitor, :kill_group, {:group, 0}])
   end
 
-  def run(args) do
-    :exec.run([bin_path() | args], [:stdout, :stderr, :monitor])
+  def run(args, opts \\ []) do
+    :exec.run([bin_path() | args], opts ++ [:stdout, :stderr, :monitor])
   end
+
+  def kill(nil), do: nil
 
   def kill(pid) do
     :exec.stop(pid)

@@ -40,7 +40,12 @@ defmodule Heroix do
   @bytes_in_kilo 1024
   @bytes_in_mega 1024 * 1024
   @bytes_in_giga 1024 * 1024 * 1024
-  def bytes_to_human(value) do
+  def bytes_to_human(value) when is_binary(value) do
+    {num, _} = Integer.parse(value)
+    bytes_to_human(num)
+  end
+
+  def bytes_to_human(value) when is_integer(value) do
     [value, unit] =
       cond do
         value > @bytes_in_giga ->
