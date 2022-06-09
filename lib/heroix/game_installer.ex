@@ -7,7 +7,9 @@ defmodule Heroix.GameInstaller do
   @topic "game_status"
 
   # execute actions and get state
-  def install_game(app_name), do: GenServer.cast(GameInstaller, {:install, app_name})
+  def install_game(app_name, opts),
+    do: GenServer.cast(GameInstaller, {:install, app_name, opts})
+
   def update_game(app_name), do: GenServer.cast(GameInstaller, {:update, app_name})
   def stop_installation(), do: GenServer.cast(GameInstaller, :stop)
 
@@ -31,8 +33,8 @@ defmodule Heroix.GameInstaller do
   #### Trigger an async action, don't wait for result
 
   # if nothing is being installed, start installing app_name
-  def handle_cast({:install, app_name}, state = %{installing: nil}) do
-    pid = install(app_name)
+  def handle_cast({:install, app_name, opts}, state = %{installing: nil}) do
+    pid = install(app_name, opts)
     log("Install #{app_name} in pid #{Heroix.pid_to_string(pid)}")
 
     new_state = Map.merge(state, %{installing: app_name, installing_pid: pid})
@@ -173,7 +175,7 @@ defmodule Heroix.GameInstaller do
   def handle_continue({:install, nil}, state), do: {:noreply, state}
 
   def handle_continue({:install, app_to_install}, state) do
-    install_game(app_to_install)
+    install_game(app_to_install, %{})
     # log("Should install #{app_to_install}")
     {:noreply, state}
   end
@@ -206,11 +208,12 @@ defmodule Heroix.GameInstaller do
   end
 
   # run legendary install app, monitor process and return pid
-  defp install(app_name) do
-    args = ["-y", "install", app_name]
-    log("Installing: #{app_name}")
+  defp install(app_name, opts) do
+    args = if opts["install_path"], do: ["--base-path", opts["install_path"]], else: []
 
-    {:ok, pid, osPid} = @binary.run(args)
+    log("Installing: #{app_name} (args: #{args}")
+
+    {:ok, pid, osPid} = @binary.install(app_name, args)
     log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid

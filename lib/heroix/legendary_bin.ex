@@ -1,5 +1,7 @@
 defmodule Heroix.LegendaryBin do
-  def run(args = ["-y", "install" | _]) do
+  def install(app_name, args \\ []) do
+    args = ["-v", "install", app_name] ++ ["-y"] ++ args
+
     # add {:group, 0} and :kill_group for installations
     # needed to properly kill the installation process and all the workers when stopped
     :exec.run([bin_path() | args], [:stdout, :stderr, :monitor, :kill_group, {:group, 0}])

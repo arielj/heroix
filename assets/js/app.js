@@ -25,8 +25,32 @@ import topbar from "../vendor/topbar";
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
+
+let Hooks = {};
+Hooks.ContentEditable = {
+  mounted() {
+    let form = this.el.closest("form");
+    let targetInput = form.querySelector(
+      `[name="${this.el.dataset.inputName}"]`
+    );
+    this.el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+      }
+    });
+    this.el.addEventListener("input", (e) => {
+      // push event to the server
+      // this.pushEvent("update_event", {content: this.el.innerText})
+      // or copy to hidden input and trigger parent form event
+      targetInput.value = this.el.innerText;
+      targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  },
+};
+
 let liveSocket = new LiveSocket("/live", Socket, {
   params: { _csrf_token: csrfToken },
+  hooks: Hooks,
 });
 
 // Show progress bar on live navigation and form submits

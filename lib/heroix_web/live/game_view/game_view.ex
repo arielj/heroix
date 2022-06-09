@@ -184,16 +184,15 @@ defmodule HeroixWeb.GameView do
     {:noreply, assign(socket, :show_config, !socket.assigns.show_config)}
   end
 
-  def handle_event("confirm-install", _data, socket) do
-    GameInstaller.install_game(socket.assigns.game["app_name"])
-    {:noreply, assign(socket, :show_add_game, false)}
-  end
-
   def handle_event("cancel-install", _data, socket) do
     {:noreply, assign(socket, :show_add_game, false)}
   end
 
   def handle_event("add-game-closed", _, socket) do
+    {:noreply, assign(socket, :show_add_game, false)}
+  end
+
+  def handle_info("add-game-closed", socket) do
     {:noreply, assign(socket, :show_add_game, false)}
   end
 
