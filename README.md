@@ -47,26 +47,25 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Uninstall
 - Enqueue games to download
 - Save game config in Legendary's config.ini (config.ini gets updated, only for specific game config)
+- Install dialog (with customizable base path)
 
 ## WIP
 
 - Install queue visualizer (needs more details on each game in the list, does not show available updates, would be nice to keep a log of finished/stopped installations)
 - Cancel installation (can be stopped, but needs more details)
 - Resume installation (it can be resumed by default, files are kept automatically)
-- Installation-related settings (install folder, more?)
 - UI to change legendary's config (legendary and defaults)
 - UI to change game's legendary config
 
 ## TODO
 
+- Login
 - Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables
-- Install dialog (with installation configuration and details)
 - Import
 - Update (dialog with details)
 - Delete partial installation
 - Visual hints for games in queue and installing in library
-- Login
 - Refresh action
 - Wine downloader
 - More tests
