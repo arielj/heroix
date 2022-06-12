@@ -24,14 +24,16 @@ defmodule HeroixWeb.Router do
     get "/:app_name/:variant", ImagesController, :get
   end
 
-  scope "/", HeroixWeb do
-    pipe_through :browser
+  live_session :default, on_mount: {HeroixWeb.InitSession, :set_current_user} do
+    scope "/", HeroixWeb do
+      pipe_through :browser
 
-    live "/", LibraryView
-    live "/library", LibraryView
-    live "/library/:app_name", GameView
-    live "/downloads", DownloadsView
-    live "/settings", SettingsView
+      live "/", LibraryView
+      live "/library", LibraryView
+      live "/library/:app_name", GameView
+      live "/downloads", DownloadsView
+      live "/settings", SettingsView
+    end
   end
 
   # Other scopes may use custom stacks.

@@ -14,6 +14,7 @@ defmodule Heroix.Application do
       {Phoenix.PubSub, name: Heroix.PubSub},
       # Start the Endpoint (http/https)
       HeroixWeb.Endpoint,
+      {Heroix.SessionManager, name: SessionManager},
       {Heroix.GameRunner, name: GameRunner},
       {Heroix.Settings, name: Settings},
       {Heroix.GameInstaller, name: GameInstaller},

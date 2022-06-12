@@ -1,14 +1,4 @@
-<aside>
-  <%= link to: "/library" do %>
-    <.font_icon icon="library" /> <%= gettext("Library") %>
-  <% end  %>
-  <%= link to: "/settings" do %>
-    <.font_icon icon="ui-settings" /> <%= gettext("Settings") %>
-  <% end  %>
-  <%= link to: "/downloads" do %>
-    <.font_icon icon="download-alt" /> <%= gettext("Downloads") %>
-  <% end  %>
-</aside>
+<.live_component module={HeroixWeb.SidebarComponent} id="sidebar" current_user={@current_user} />
 <main class="container">
   <p class="alert alert-info" role="alert"
     phx-click="lv:clear-flash"
