@@ -5,6 +5,7 @@ defmodule Heroix.SessionManager do
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
   def current_user, do: GenServer.call(SessionManager, :current_user)
+  def login(sid), do: GenServer.cast(SessionManager, {:login, sid})
 
   def start_link(options) do
     log("GenServer starting")
@@ -47,6 +48,40 @@ defmodule Heroix.SessionManager do
 
   def handle_call(:current_user, _, state = %{current_user: current_user}) do
     {:reply, current_user, state}
+  end
+
+  def handle_cast({:login, sid}, state) do
+    {:ok, [stdout: _, stderr: stderr]} = @binary.run(["auth", "--sid", sid], [:sync])
+
+    output = Enum.join(stderr, " ")
+
+    IO.inspect(
+      Regex.run(~r/(Successfully logged in) as \"(.*)\"|(errorCode).*'message': '(.*)', /, output)
+    )
+
+    new_state =
+      case Regex.run(
+             ~r/(Successfully logged in) as \"(.*)\"|(errorCode).*'message': '(.*)', /,
+             output
+           ) do
+        [_match, "Successfully logged in", user_name] ->
+          HeroixWeb.Endpoint.broadcast("session", "current_user", %{user_name: user_name})
+
+          @binary.run(["list"])
+
+          Map.put(state, :current_user, user_name)
+
+        [_match, "", "", "errorCode", error] ->
+          IO.inspect(error)
+          HeroixWeb.Endpoint.broadcast("session", "login_error", %{error: error})
+          state
+
+        _ ->
+          IO.inspect(output)
+          state
+      end
+
+    {:noreply, new_state}
   end
 
   defp extract_output({:ok, [stdout: [output]]}), do: output

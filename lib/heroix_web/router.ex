@@ -29,6 +29,7 @@ defmodule HeroixWeb.Router do
       pipe_through :browser
 
       live "/", LibraryView
+      live "/login", LoginView
       live "/library", LibraryView
       live "/library/:app_name", GameView
       live "/downloads", DownloadsView

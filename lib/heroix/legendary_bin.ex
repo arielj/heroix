@@ -7,6 +7,11 @@ defmodule Heroix.LegendaryBin do
     :exec.run([bin_path() | args], [:stdout, :stderr, :monitor, :kill_group, {:group, 0}])
   end
 
+  # TODO: no feedback to the user for now when fetching the list
+  def run(args = ["list"]) do
+    :exec.run([bin_path() | args], [])
+  end
+
   def run(args, opts \\ []) do
     :exec.run([bin_path() | args], opts ++ [:stdout, :stderr, :monitor])
   end

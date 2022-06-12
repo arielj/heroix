@@ -48,6 +48,7 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Enqueue games to download
 - Save game config in Legendary's config.ini (config.ini gets updated, only for specific game config)
 - Install dialog (with customizable base path)
+- Login (using SID)
 
 ## WIP
 
@@ -59,7 +60,6 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 
 ## TODO
 
-- Login
 - Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables
 - Import
@@ -75,7 +75,9 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Cloud saves
 - hide games
 - game categories
+- about screen (version of tools, etc)
 - elixir-desktop stuff (standalone app, tray icon)
+- gamepad navigation
 - Pre/Post game scripts (pre script is a legendary feature!)
 - Game OS version picker (Mac/Windows)
 - Game versions configuration (install older version?)

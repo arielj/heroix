@@ -50,8 +50,13 @@ defmodule HeroixWeb do
       unquote(view_helpers())
 
       def handle_info(%{event: "current_user", payload: %{user_name: user_name}}, socket) do
-        {:noreply, assign(socket, :current_user, user_name)}
+        new_data = [current_user: user_name] ++ logged_in_state_updates()
+
+        {:noreply, assign(socket, new_data)}
       end
+
+      def logged_in_state_updates, do: []
+      defoverridable(logged_in_state_updates: 0)
     end
   end
 
