@@ -1,0 +1,41 @@
+#downloads {
+  .download {
+    display: grid;
+    margin-bottom: 1rem;
+    background: gray;
+    column-gap: 1rem;
+    width: 500px;
+    padding: 0.5rem;
+
+    .cover {
+      width: 200px;
+      height: 120px;
+      object-fit: cover;
+    }
+
+    label {
+      grid-area: title;
+      font-weight: bold;
+    }
+
+    .cover {
+      grid-area: image;
+    }
+
+    &.current {
+      grid-template-areas: "title title title" "image progress action" "image eta action";
+      grid-template-columns: max-content 1fr auto;
+
+      button {
+        grid-area: action;
+        align-self: center;
+        padding: 1rem;
+        cursor: pointer;
+      }
+    }
+
+    &.queue {
+      grid-template-areas: "title" "image";
+    }
+  }
+}

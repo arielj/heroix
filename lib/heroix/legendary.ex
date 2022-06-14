@@ -21,6 +21,24 @@ defmodule Heroix.Legendary do
     end
   end
 
+  def games_info(app_names) do
+    installed = installed_games()
+
+    app_names
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(fn app_name ->
+      case Heroix.get_json(game_metadata_path(app_name)) do
+        {:error, :enoent} ->
+          {:error, "Game not found"}
+
+        {:ok, json} ->
+          %{"app_name" => app_name} = json
+          json = Map.put(json, "installed_info", installed[app_name])
+          {:ok, json}
+      end
+    end)
+  end
+
   def installed_games do
     case Heroix.get_json(installed_path()) do
       {:ok, json} -> json

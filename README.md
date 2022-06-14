@@ -78,6 +78,7 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - about screen (version of tools, etc)
 - elixir-desktop stuff (standalone app, tray icon)
 - gamepad navigation
+- Download/update legendary
 - Pre/Post game scripts (pre script is a legendary feature!)
 - Game OS version picker (Mac/Windows)
 - Game versions configuration (install older version?)

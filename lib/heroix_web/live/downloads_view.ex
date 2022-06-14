@@ -2,6 +2,7 @@ defmodule HeroixWeb.DownloadsView do
   use HeroixWeb, :live_view
 
   alias Heroix.GameInstaller
+  alias Heroix.Legendary
 
   def mount(_, _, socket) do
     queue = GameInstaller.queue()
@@ -13,6 +14,7 @@ defmodule HeroixWeb.DownloadsView do
      assign(socket,
        page_title: "Downloads",
        queue: queue,
+       games_info: games_info_for(installing, queue),
        installing: installing,
        installation_progress: "",
        installation_eta: ""
@@ -24,18 +26,23 @@ defmodule HeroixWeb.DownloadsView do
     <section id="downloads">
       <h1>Downloads</h1>
       <%= if @installing do %>
-        <div>
-          <label><%= @installing %></label>
+        <div class="download current">
+          <label><%= @games_info[@installing]["app_title"] %></label>
+          <img src={"/image/#{@installing}/wide"} class="cover" />
           <span>Progress: <%= @installation_progress %>%</span>
           <span>ETA: <%= @installation_eta %></span>
           <button phx-click="stop">Stop</button>
         </div>
       <% end %>
 
-      <%= for game <- @queue do %>
-        <div>
-          <label><%= game %></label>
-        </div>
+      <%= if length(@queue) > 0 do %>
+        <h3>Next in queue</h3>
+        <%= for queue_item <- @queue do %>
+          <div class="download queue">
+            <img src={"/image/#{queue_item.app_name}/wide"} class="cover" />
+            <label><%= @games_info[queue_item.app_name]["app_title"] %></label>
+          </div>
+        <% end %>
       <% end %>
     </section>
     """
@@ -50,7 +57,12 @@ defmodule HeroixWeb.DownloadsView do
     queue = GameInstaller.queue()
     installing = GameInstaller.installing()
 
-    {:noreply, assign(socket, queue: queue, installing: installing)}
+    {:noreply,
+     assign(socket,
+       queue: queue,
+       installing: installing,
+       games_info: games_info_for(installing, queue)
+     )}
   end
 
   def handle_info(%{event: event}, socket) when event in ["installed", "installation_stopped"] do
@@ -75,5 +87,15 @@ defmodule HeroixWeb.DownloadsView do
   def handle_info(event, socket) do
     IO.inspect("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
+  end
+
+  def games_info_for(installing, queue) do
+    app_names = Enum.map(queue, fn queue_item -> queue_item.app_name end) ++ [installing]
+
+    app_names
+    |> Legendary.games_info()
+    |> Enum.map(fn {:ok, json} -> {json["app_name"], json} end)
+    |> Enum.into(%{})
+    |> IO.inspect()
   end
 end

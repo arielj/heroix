@@ -45,10 +45,10 @@ defmodule Heroix.GameInstaller do
   end
 
   # if something is being installed, enqueue app_name
-  def handle_cast({:install, app_name}, state = %{installing: installing_app_name}) do
+  def handle_cast({:install, app_name, opts}, state = %{installing: installing_app_name}) do
     log("Installation in progress (#{installing_app_name}), enqueuing.")
 
-    state = Map.put(state, :queue, state.queue ++ [app_name])
+    state = Map.put(state, :queue, state.queue ++ [%{app_name: app_name, opts: opts}])
 
     HeroixWeb.Endpoint.broadcast!(@topic, "enqueued", %{app_name: app_name})
 
@@ -156,7 +156,7 @@ defmodule Heroix.GameInstaller do
   def handle_continue({:remove_from_queue, app_name}, state = %{queue: queue}) do
     log("Removing game from queue")
 
-    new_queue = Enum.reject(queue, fn name -> name == app_name end)
+    new_queue = Enum.reject(queue, fn queue_item -> queue_item.app_name == app_name end)
 
     {:noreply, Map.merge(state, %{queue: new_queue}), {:continue, :check_queue}}
   end
@@ -166,7 +166,11 @@ defmodule Heroix.GameInstaller do
 
     if length(queue) > 0 do
       [app_to_install | new_queue] = queue
-      {:noreply, Map.merge(state, %{queue: new_queue}), {:continue, {:install, app_to_install}}}
+      app_name_to_install = app_to_install.app_name
+      opts_to_install = app_to_install.opts
+
+      {:noreply, Map.merge(state, %{queue: new_queue}),
+       {:continue, {:install, app_name_to_install, opts_to_install}}}
     else
       {:noreply, state}
     end
@@ -174,8 +178,8 @@ defmodule Heroix.GameInstaller do
 
   def handle_continue({:install, nil}, state), do: {:noreply, state}
 
-  def handle_continue({:install, app_to_install}, state) do
-    install_game(app_to_install, %{})
+  def handle_continue({:install, app_to_install, opts}, state) do
+    install_game(app_to_install, opts)
     # log("Should install #{app_to_install}")
     {:noreply, state}
   end
