@@ -39,10 +39,18 @@ defmodule Heroix.GameRunner do
     {:noreply, state}
   end
 
-  def handle_cast(:stop, state = %{game_pid: game_pid, app_name: app_name}) do
-    log("Stopping #{app_name} (OS pid: #{game_pid})")
+  def handle_cast(:stop, state) do
+    %{game_pid: game_pid, legendary_pid: legendary_pid, app_name: app_name} = state
 
-    @binary.kill(game_pid)
+    if legendary_pid do
+      log("Stopping legendary before game launched")
+
+      @binary.kill(legendary_pid)
+    else
+      log("Stopping #{app_name} (OS pid: #{game_pid})")
+
+      @binary.kill(game_pid)
+    end
 
     {:noreply, state}
   end
@@ -60,21 +68,37 @@ defmodule Heroix.GameRunner do
   end
 
   # search for the game's OS PID after legendary process ends
-  def handle_info(msg = {:DOWN, _os_pid, :process, pid, :normal}, state) do
-    %{app_name: app_name, legendary_pid: legendary_pid} = state
+  def handle_info(msg = {:DOWN, os_pid, :process, pid, :normal}, state) do
+    %{app_name: app_name, legendary_pid: legendary_pid, game_pid: game_pid} = state
 
-    if pid == legendary_pid do
-      log("Legendary launched the game")
-      game_pid = find_game_pid(app_name)
-      log("In process: #{game_pid}")
+    cond do
+      pid == legendary_pid ->
+        case find_game_pid(app_name) do
+          1 ->
+            log("Legendary stopped before launching the game")
 
-      # monitor OS process
-      :exec.manage(game_pid, [:stderr, :stdout, :monitor])
+            HeroixWeb.Endpoint.broadcast(@topic, "stopped", %{app_name: app_name})
 
-      {:noreply, Map.put(state, :game_pid, game_pid)}
-    else
-      log("Unknown process DOWN #{msg}")
-      {:noreply, state}
+            {:noreply, Map.put(state, :legendary_pid, nil)}
+
+          game_pid ->
+            log("Legendary launched the game in process: #{game_pid}")
+
+            # monitor OS process
+            :exec.manage(game_pid, [:stderr, :stdout, :monitor])
+
+            {:noreply, Map.merge(state, %{game_pid: game_pid, legendary_pid: nil})}
+        end
+
+      os_pid == game_pid ->
+        log("Game stopped")
+        HeroixWeb.Endpoint.broadcast(@topic, "stopped", %{app_name: app_name})
+
+        {:noreply, Map.put(state, :game_pid, nil)}
+
+      true ->
+        log("Unknown process DOWN #{inspect(msg)}")
+        {:noreply, state}
     end
   end
 
