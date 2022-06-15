@@ -1,6 +1,6 @@
 defmodule Heroix.GameRunner do
   use GenServer
-  require Logger
+  use HeroixLog, "GameRunner"
 
   @topic "game_status"
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
@@ -96,10 +96,6 @@ defmodule Heroix.GameRunner do
   def handle_info(msg, state) do
     log("Unhandled message: #{inspect(msg)}")
     {:noreply, state}
-  end
-
-  def log(msg) do
-    Logger.info("[GameRunner] #{String.trim(msg)}")
   end
 
   defp initial_state() do

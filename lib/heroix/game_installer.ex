@@ -1,6 +1,6 @@
 defmodule Heroix.GameInstaller do
   use GenServer
-  require Logger
+  use HeroixLog, "GameInstaller"
 
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
@@ -90,15 +90,6 @@ defmodule Heroix.GameInstaller do
 
     {:noreply, state}
   end
-
-  # # when the installation is stopped by an exception in Legendary
-  # def handle_info({:DOWN, _os_pid, :process, _pid, {:exit_status, 256}}, state) do
-  #   %{installing: stopped_app_name} = state
-
-  #   IO.inspect("Error installing game, check logs")
-
-  #   {:noreply, state, {:continue, {:remove_from_queue, stopped_app_name}}}
-  # end
 
   # the fetch install info task is terminated, do nothing
   def handle_info({:DOWN, ref, :process, _pid, :normal}, state) when is_reference(ref) do
@@ -197,10 +188,6 @@ defmodule Heroix.GameInstaller do
   def handle_call(:reset, _from, _), do: {:reply, nil, initial_state()}
 
   #### Some helper function
-
-  defp log(msg) do
-    Logger.info("[GameInstaller] #{String.trim(msg)}")
-  end
 
   defp initial_state() do
     %{

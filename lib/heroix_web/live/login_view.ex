@@ -1,5 +1,6 @@
 defmodule HeroixWeb.LoginView do
   use HeroixWeb, :live_view
+  use HeroixLog, "LoginView"
 
   alias Heroix.SessionManager
 
@@ -39,7 +40,7 @@ defmodule HeroixWeb.LoginView do
 
         <form phx-change="sid-changed">
           <input name="sid" value={@sid} />
-          <button type="button" phx-click="login" disabled={@sid == ""}>Login</button>
+          <button type="button" phx-click="login" disabled={@sid == "" || @login_in_progress}>Login</button>
         </form>
       <% end %>
     </section>
@@ -61,7 +62,7 @@ defmodule HeroixWeb.LoginView do
   end
 
   def handle_info(event, socket) do
-    IO.inspect("Unhandled info: #{inspect(event)}")
+    log("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
   end
 

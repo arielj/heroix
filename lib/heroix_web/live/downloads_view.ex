@@ -1,5 +1,6 @@
 defmodule HeroixWeb.DownloadsView do
   use HeroixWeb, :live_view
+  use HeroixLog, "DownloadsView"
 
   alias Heroix.GameInstaller
   alias Heroix.Legendary
@@ -85,7 +86,7 @@ defmodule HeroixWeb.DownloadsView do
   end
 
   def handle_info(event, socket) do
-    IO.inspect("Unhandled info: #{inspect(event)}")
+    log("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
   end
 
@@ -96,6 +97,5 @@ defmodule HeroixWeb.DownloadsView do
     |> Legendary.games_info()
     |> Enum.map(fn {:ok, json} -> {json["app_name"], json} end)
     |> Enum.into(%{})
-    |> IO.inspect()
   end
 end

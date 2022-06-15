@@ -1,6 +1,6 @@
 defmodule HeroixWeb.LibraryView do
   use HeroixWeb, :live_view
-  require Logger
+  use HeroixLog, "LibraryView"
 
   alias Heroix.Legendary
   import HeroixWeb.GameImageComponent
@@ -157,7 +157,7 @@ defmodule HeroixWeb.LibraryView do
   end
 
   def handle_info(event, socket) do
-    Logger.info("Unhandled info: #{inspect(event)}")
+    log("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
   end
 end

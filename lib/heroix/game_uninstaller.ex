@@ -1,6 +1,6 @@
 defmodule Heroix.GameUninstaller do
   use GenServer
-  require Logger
+  use HeroixLog, "GameUninstaller"
 
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
   @topic "game_status"
@@ -80,10 +80,6 @@ defmodule Heroix.GameUninstaller do
   end
 
   #### Some helper function
-
-  defp log(msg) do
-    Logger.info("[GameUninstaller] #{String.trim(msg)}")
-  end
 
   defp initial_state() do
     %{

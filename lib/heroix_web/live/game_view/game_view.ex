@@ -1,7 +1,6 @@
 defmodule HeroixWeb.GameView do
   use HeroixWeb, :live_view
-
-  require Logger
+  use HeroixLog, "GameView"
 
   alias Heroix.Legendary
   alias Heroix.GameRunner
@@ -14,7 +13,7 @@ defmodule HeroixWeb.GameView do
 
   def mount(%{"app_name" => app_name}, _, socket) do
     {:ok, game_info} = Legendary.game_info(app_name)
-    # IO.inspect(game_info)
+    # log(game_info)
 
     # subscribe to game status updates
     HeroixWeb.Endpoint.subscribe("game_status")
@@ -289,9 +288,5 @@ defmodule HeroixWeb.GameView do
   def handle_info(event, socket) do
     log("Unhandled info: #{inspect(event)}")
     {:noreply, socket}
-  end
-
-  defp log(msg) do
-    Logger.info("[GameView] #{String.trim(msg)}")
   end
 end

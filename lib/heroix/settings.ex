@@ -1,6 +1,6 @@
 defmodule Heroix.Settings do
   use GenServer
-  require Logger
+  use HeroixLog, "Settings"
 
   alias Heroix.Legendary
 
@@ -118,10 +118,6 @@ defmodule Heroix.Settings do
     new_legendary = Map.put(legendary_config, "Legendary", new_legendary_config)
     new_state = Map.put(state, :legendary, new_legendary)
 
-    IO.inspect(new_legendary_config)
-    IO.inspect(new_legendary)
-    IO.inspect(new_state)
-
     if save, do: Legendary.write_config(new_legendary)
 
     {:reply, new_legendary_config, new_state}
@@ -142,10 +138,6 @@ defmodule Heroix.Settings do
   def handle_info(msg, state) do
     log("Unhandled message: #{inspect(msg)}")
     {:noreply, state}
-  end
-
-  def log(msg) do
-    Logger.info("[Settings] #{String.trim(msg)}")
   end
 
   defp initial_state() do

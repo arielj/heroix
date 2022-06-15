@@ -1,6 +1,6 @@
 defmodule Heroix.SessionManager do
   use GenServer
-  require Logger
+  use HeroixLog, "SessionManager"
 
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
@@ -15,10 +15,6 @@ defmodule Heroix.SessionManager do
   def init([]) do
     log("GenServer started")
     {:ok, initial_state(), {:continue, :check_user}}
-  end
-
-  def log(msg) do
-    Logger.info("[SessionManager] #{String.trim(msg)}")
   end
 
   def handle_continue(:check_user, state) do
@@ -55,10 +51,6 @@ defmodule Heroix.SessionManager do
 
     output = Enum.join(stderr, " ")
 
-    IO.inspect(
-      Regex.run(~r/(Successfully logged in) as \"(.*)\"|(errorCode).*'message': '(.*)', /, output)
-    )
-
     new_state =
       case Regex.run(
              ~r/(Successfully logged in) as \"(.*)\"|(errorCode).*'message': '(.*)', /,
@@ -72,12 +64,12 @@ defmodule Heroix.SessionManager do
           Map.put(state, :current_user, user_name)
 
         [_match, "", "", "errorCode", error] ->
-          IO.inspect(error)
+          log(error)
           HeroixWeb.Endpoint.broadcast("session", "login_error", %{error: error})
           state
 
         _ ->
-          IO.inspect(output)
+          log(output)
           state
       end
 

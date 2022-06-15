@@ -7,6 +7,16 @@ defmodule Heroix do
   if it comes from the database, an external API or others.
   """
 
+  def logger(tag) do
+    quote do
+      require Logger
+
+      def log(to_log) do
+        Logger.info("[#{unquote(tag)}] #{inspect(to_log)}")
+      end
+    end
+  end
+
   def get_json(filename) do
     with {:ok, body} <- File.read(filename),
          {:ok, json} <- Jason.decode(body) do
