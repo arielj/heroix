@@ -16,6 +16,9 @@ defmodule Heroix.GameInstaller do
   def fetch_install_info(app_name),
     do: GenServer.cast(GameInstaller, {:fetch_install_info, app_name})
 
+  def fetch_download_info(app_name, base_path),
+    do: GenServer.cast(GameInstaller, {:fetch_download_info, app_name, base_path})
+
   def reset(), do: GenServer.call(GameInstaller, :reset)
   def installing(), do: GenServer.call(GameInstaller, :installing)
   def queue(), do: GenServer.call(GameInstaller, :queue)
@@ -65,15 +68,39 @@ defmodule Heroix.GameInstaller do
   end
 
   def handle_cast({:fetch_install_info, app_name}, state) do
-    Task.Supervisor.async_nolink(Task.MySupervisor, fn ->
-      install_info = Heroix.Legendary.game_install_info(app_name)
+    case state.install_info[app_name] do
+      nil ->
+        Task.Supervisor.async_nolink(Task.MySupervisor, fn ->
+          install_info = Heroix.Legendary.game_install_info(app_name)
 
-      HeroixWeb.Endpoint.broadcast!(@topic, "install_info_ready", %{
+          HeroixWeb.Endpoint.broadcast!(@topic, "install_info_ready", %{
+            app_name: app_name,
+            install_info: install_info
+          })
+
+          {:install_info_ready, app_name, install_info}
+        end)
+
+      install_info ->
+        HeroixWeb.Endpoint.broadcast!(@topic, "install_info_ready", %{
+          app_name: app_name,
+          install_info: install_info
+        })
+    end
+
+    {:noreply, state}
+  end
+
+  def handle_cast({:fetch_download_info, app_name, base_path}, state) do
+    Task.Supervisor.async_nolink(Task.MySupervisor, fn ->
+      download_info = Heroix.Legendary.game_download_info(app_name, base_path)
+
+      HeroixWeb.Endpoint.broadcast!(@topic, "download_info_ready", %{
         app_name: app_name,
-        install_info: install_info
+        download_info: download_info
       })
 
-      {:install_info_ready}
+      {:download_info_ready}
     end)
 
     {:noreply, state}
@@ -85,10 +112,65 @@ defmodule Heroix.GameInstaller do
   def handle_info({std, pid, msg}, state) when std in [:stdout, :stderr] do
     log("[Legendary] (#{pid}) #{msg}")
 
-    %{installing: app_name} = state
-    process_progress(msg, app_name)
+    %{installing: app_name, install_progress: install_progress} = state
 
-    {:noreply, state}
+    # Download size: 7920.80 MiB (Compression savings: 6.1%)
+    # Progress: 99.50% (596/599), Running for 00:00:24, ETA: 00:00:00
+    # Downloaded: 390.03 MiB, Written: 1157.98 MiB
+    new_state =
+      case Regex.run(
+             ~r/(Download size): (.*) \(Compression|(Progress).*, ETA: (\d\d:\d\d:\d\d)|(Downloaded): (.*), Written/,
+             msg
+           ) do
+        nil ->
+          state
+
+        [_match, "Download size", to_download] ->
+          # find how much has to be downloaded and compare with total download size
+          total_to_download = state.install_info[app_name]["manifest"]["download_size"]
+
+          [value, unit] = String.split(to_download, " ")
+
+          to_download = Heroix.human_to_bytes(value, unit)
+
+          new_install_progress =
+            Map.merge(install_progress, %{
+              total_size: total_to_download,
+              to_download: to_download,
+              reusable: total_to_download - to_download
+            })
+
+          Map.put(state, :install_progress, new_install_progress)
+
+        [_match, "", "", "Progress", eta] ->
+          # find the ETA
+          new_install_progress = Map.merge(install_progress, %{eta: eta})
+
+          Map.put(state, :install_progress, new_install_progress)
+
+        [_match, "", "", "", "", "Downloaded", downloaded] ->
+          # find how much was downloaded, add reusable files and calculate %
+          [value, unit] = String.split(downloaded, " ")
+
+          total_downloaded = install_progress.reusable + Heroix.human_to_bytes(value, unit)
+
+          percent = "#{Float.round(100 * total_downloaded / install_progress.total_size, 2)}%"
+
+          new_install_progress =
+            Map.merge(install_progress, %{
+              downloaded: total_downloaded,
+              percent: percent
+            })
+
+          HeroixWeb.Endpoint.broadcast!(@topic, "installation_progress", %{
+            app_name: app_name,
+            progress: new_install_progress
+          })
+
+          Map.put(state, :install_progress, new_install_progress)
+      end
+
+    {:noreply, new_state}
   end
 
   # the fetch install info task is terminated, do nothing
@@ -133,7 +215,14 @@ defmodule Heroix.GameInstaller do
   end
 
   # fetch install info async task finished, do nothing
-  def handle_info({_ref, {:install_info_ready}}, state) do
+  def handle_info({_ref, {:install_info_ready, app_name, install_info}}, state) do
+    new_install_info = Map.put(state.install_info, app_name, install_info)
+    new_state = Map.put(state, :install_info, new_install_info)
+
+    {:noreply, new_state}
+  end
+
+  def handle_info({_ref, {:download_info_ready}}, state) do
     {:noreply, state}
   end
 
@@ -194,7 +283,9 @@ defmodule Heroix.GameInstaller do
       installing: nil,
       installing_pid: nil,
       stopped: nil,
-      queue: []
+      queue: [],
+      install_info: %{},
+      install_progress: %{total_size: 0, to_download: 0, downloaded: 0, percent: "0%", eta: "--"}
     }
   end
 
@@ -208,21 +299,5 @@ defmodule Heroix.GameInstaller do
     log("Running in pid: #{Heroix.pid_to_string(pid)} (OS pid: #{osPid})")
 
     pid
-  end
-
-  # process log entry, extract installation progress and broadcast
-  defp process_progress(msg, app_name) do
-    # Progress: 99.50% (596/599), Running for 00:00:24, ETA: 00:00:00
-    case Regex.run(~r/Progress: (\d+\.\d+)% .*, ETA: (\d\d:\d\d:\d\d)/, msg) do
-      nil ->
-        nil
-
-      [_match, percent, eta] ->
-        HeroixWeb.Endpoint.broadcast!(@topic, "installation_progress", %{
-          app_name: app_name,
-          percent: percent,
-          eta: eta
-        })
-    end
   end
 end

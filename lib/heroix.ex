@@ -57,12 +57,24 @@ defmodule Heroix do
         value > @bytes_in_kilo ->
           [value / @bytes_in_kilo, "KB"]
 
+        value < 0 ->
+          [0.0, "B"]
+
         true ->
-          [value, "B"]
+          [value / 1, "B"]
       end
 
     "#{Float.round(value, 2)}#{unit}"
   end
+
+  def human_to_bytes(value, unit) when is_binary(value) do
+    {num, _} = Float.parse(value)
+    human_to_bytes(num, unit)
+  end
+
+  def human_to_bytes(value, "KiB"), do: trunc(value * @bytes_in_kilo)
+  def human_to_bytes(value, "MiB"), do: trunc(value * @bytes_in_mega)
+  def human_to_bytes(value, "GiB"), do: trunc(value * @bytes_in_giga)
 
   # Converts Elixir pid (not OS pid) to string
   def pid_to_string(pid) do

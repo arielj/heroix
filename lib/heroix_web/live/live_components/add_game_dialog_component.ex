@@ -36,17 +36,37 @@ defmodule HeroixWeb.AddGameDialogComponent do
         <%= if @install_info do %>
           <span>Install</span>
           <h2><%= @install_info["game"]["title"] %></h2>
-          <div><label>Download Size:</label> <%= Heroix.bytes_to_human(@install_info["manifest"]["download_size"]) %></div>
-          <div><label>Installed Size:</label> <%= Heroix.bytes_to_human(@install_info["manifest"]["disk_size"]) %></div>
+
+          <div>
+            <h3>Download Size</h3>
+              <%= if @reusable_percent > 0 do %>
+                <b>A paused download was found in the selected directory</b>
+                <br />
+                Total download size: <%= Heroix.bytes_to_human(@total_download) %>
+                <br />
+                To download: <%= Heroix.bytes_to_human(@download_info) %> (Found: <%= Heroix.bytes_to_human(@total_download - @download_info) %> (<%= @reusable_percent %>%))
+              <% else %>
+                <%= Heroix.bytes_to_human(@total_download) %>
+              <% end %>
+          </div>
+
+          <div>
+            <label>Installed Size:</label> <%= Heroix.bytes_to_human(@install_info["manifest"]["disk_size"]) %>
+          </div>
+
           <form phx-change="install-config-changed" phx-target={@myself}>
             <label>Install Folder (base path can be edited):</label>
             <div class="install-folder">
-              <input type="hidden" name="install-path" value={@install_path} />
+              <input type="hidden" name="install-path" value={@install_path} phx-debounce="500" />
               <span id="base-path" class="base-path" contenteditable="true" phx-hook="ContentEditable" phx-update="ignore" data-input-name="install-path"><%= @install_path %></span>
               /
               <span><%= @game_info["metadata"]["customAttributes"]["FolderName"]["value"] %></span>
             </div>
-            <button type="button" phx-click={confirm_install()} phx-target={@myself}>Install</button>
+            <%= if @calculating_download do %>
+              Calculating download... wait
+            <% else %>
+              <button type="button" phx-click={confirm_install()} phx-target={@myself}>Install</button>
+            <% end %>
             <button type="button" phx-click={hide_modal()}>Cancel</button>
           </form>
         <% else %>
@@ -58,12 +78,28 @@ defmodule HeroixWeb.AddGameDialogComponent do
   end
 
   def update(assigns, socket) do
+    install_info = Map.get(assigns, :install_info, nil)
+    total_download = if install_info, do: install_info["manifest"]["download_size"], else: nil
+    download_info = Map.get(assigns, :download_info, nil)
+
+    reusable_percent =
+      if total_download && download_info do
+        x = 100 * (total_download - download_info) / total_download
+        Float.round(x, 1)
+      else
+        0
+      end
+
     {:ok,
      assign(socket,
        game_info: assigns.game_info,
-       install_info: Map.get(assigns, :install_info, nil),
+       install_info: install_info,
+       total_download: total_download,
+       download_info: download_info,
+       reusable_percent: reusable_percent,
        install_path: Map.get(assigns, :install_path, Settings.legendary()["install_dir"]),
-       default: Settings.legendary_game_config(:default)
+       default: Settings.legendary_game_config(:default),
+       calculating_download: assigns.calculating_download
      )}
   end
 
@@ -90,6 +126,8 @@ defmodule HeroixWeb.AddGameDialogComponent do
         socket.assigns.install_path
         |> String.replace("\n", "")
 
-    {:noreply, assign(socket, :install_path, install_path)}
+    GameInstaller.fetch_download_info(socket.assigns.game_info["app_name"], install_path)
+
+    {:noreply, assign(socket, install_path: install_path, calculating_download: true)}
   end
 end

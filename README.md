@@ -49,17 +49,18 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Save game config in Legendary's config.ini (config.ini gets updated, only for specific game config)
 - Install dialog (with customizable base path)
 - Login (using SID)
+- Resume installation (show correct progress calculating previously downloaded files)
 
 ## WIP
 
 - Install queue visualizer (needs more details on each game in the list, does not show available updates, would be nice to keep a log of finished/stopped installations)
 - Cancel installation (can be stopped, but needs more details)
-- Resume installation (it can be resumed by default, files are kept automatically)
 - UI to change legendary's config (legendary and defaults)
 - UI to change game's legendary config
 
 ## TODO
 
+- Show error when trying to install a DLC without the main game
 - Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables
 - Import

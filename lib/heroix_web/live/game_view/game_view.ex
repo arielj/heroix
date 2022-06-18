@@ -15,11 +15,13 @@ defmodule HeroixWeb.GameView do
     {:ok, game_info} = Legendary.game_info(app_name)
     # log(game_info)
 
-    # subscribe to game status updates
-    HeroixWeb.Endpoint.subscribe("game_status")
+    if socket.root_pid do
+      # subscribe to game status updates
+      HeroixWeb.Endpoint.subscribe("game_status")
 
-    if !game_info["installed_info"] do
-      GameInstaller.fetch_install_info(app_name)
+      if !game_info["installed_info"] do
+        GameInstaller.fetch_install_info(app_name)
+      end
     end
 
     {:ok,
@@ -32,9 +34,12 @@ defmodule HeroixWeb.GameView do
        install_queue: GameInstaller.queue(),
        install_progress: nil,
        install_eta: nil,
+       install_downloaded: nil,
        install_info: nil,
+       download_info: nil,
        show_add_game: false,
-       show_config: false
+       show_config: false,
+       calculating_download: false
      )}
   end
 
@@ -114,8 +119,12 @@ defmodule HeroixWeb.GameView do
             </button>
           <% else %>
             <%= if @installing == app_name do %>
-              <%= if @install_progress && @install_eta do %>
-                Installing <%= @install_progress %>% (ETA: <%= @install_eta %>)
+              <%= if @install_progress && @install_eta && @install_downloaded do %>
+                Installing...
+                <br />
+                Downloaded: <%= Heroix.bytes_to_human(@install_downloaded) %> (<%= @install_progress %>)
+                <br />
+                ETA: <%= @install_eta %>
               <% else %>
                 Starting installation...
               <% end %>
@@ -147,7 +156,7 @@ defmodule HeroixWeb.GameView do
       </div>
       <.live_component module={GameConfigComponent} id={"game-config:#{app_name}"} app_name={app_name} />
       <%= if @show_add_game do %>
-        <.live_component module={AddGameDialogComponent} id={"add-game:#{app_name}"} game_info={@game} install_info={@install_info} />
+        <.live_component module={AddGameDialogComponent} id={"add-game:#{app_name}"} game_info={@game} install_info={@install_info} download_info={@download_info} calculating_download={@calculating_download} />
       <% end %>
     </section>
     """
@@ -166,7 +175,10 @@ defmodule HeroixWeb.GameView do
   end
 
   def handle_event("add-game", _, socket) do
-    {:noreply, assign(socket, :show_add_game, true)}
+    GameInstaller.fetch_download_info(socket.assigns.app_name, nil)
+
+    {:noreply,
+     assign(socket, show_add_game: true, calculating_download: true, download_info: nil)}
   end
 
   def handle_event("uninstall", _, socket) do
@@ -218,10 +230,12 @@ defmodule HeroixWeb.GameView do
   end
 
   def handle_info(%{event: "installation_progress", payload: payload}, socket) do
-    %{app_name: app_name, percent: percent, eta: eta} = payload
+    %{app_name: app_name, progress: %{percent: percent, eta: eta, downloaded: downloaded}} =
+      payload
 
     if app_name == socket.assigns.app_name do
-      {:noreply, assign(socket, install_progress: percent, install_eta: eta)}
+      {:noreply,
+       assign(socket, install_progress: percent, install_eta: eta, install_downloaded: downloaded)}
     else
       {:noreply, socket}
     end
@@ -237,7 +251,9 @@ defmodule HeroixWeb.GameView do
          installing: GameInstaller.installing(),
          install_queue: GameInstaller.queue(),
          install_progress: nil,
-         install_eta: nil
+         install_eta: nil,
+         install_downloaded: nil,
+         calculating_download: false
        )}
     else
       {:noreply, socket}
@@ -263,11 +279,29 @@ defmodule HeroixWeb.GameView do
       send_update(AddGameDialogComponent,
         id: "add-game:#{app_name}",
         install_info: install_info,
-        game_info: socket.assigns.game
+        download_info: socket.assigns.download_info,
+        game_info: socket.assigns.game,
+        calculating_download: socket.assigns.calculating_download
       )
     end
 
     {:noreply, assign(socket, :install_info, install_info)}
+  end
+
+  def handle_info(%{event: "download_info_ready", payload: payload}, socket) do
+    %{app_name: app_name, download_info: download_info} = payload
+
+    if socket.assigns.show_add_game do
+      send_update(AddGameDialogComponent,
+        id: "add-game:#{app_name}",
+        install_info: socket.assigns.install_info,
+        download_info: download_info,
+        game_info: socket.assigns.game,
+        calculating_download: false
+      )
+    end
+
+    {:noreply, assign(socket, download_info: download_info, calculating_download: false)}
   end
 
   #### handle GameUninstaller broadcasted events

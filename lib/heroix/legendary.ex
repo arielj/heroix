@@ -69,6 +69,22 @@ defmodule Heroix.Legendary do
     end
   end
 
+  def game_download_info(app_name, base_path) do
+    args = if base_path, do: ["--base-path", base_path], else: []
+
+    {:error, [exit_status: 256, stdout: _, stderr: output]} =
+      @binary.run(["install", app_name] ++ args, [:sync])
+
+    output = Enum.join(output, " ")
+
+    [_match, "Download size", download_size] =
+      Regex.run(~r/(Download size): (.*) \(Compression/, output)
+
+    [value, unit] = String.split(download_size, " ")
+
+    Heroix.human_to_bytes(value, unit)
+  end
+
   defp process_first_line(lines, acc, key \\ "")
 
   defp process_first_line([line | rest], acc, key) do
