@@ -60,6 +60,8 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 
 ## TODO
 
+- Selective downloads
+- Anticheat status
 - Show error when trying to install a DLC without the main game
 - Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables

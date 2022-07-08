@@ -5,6 +5,7 @@ defmodule Heroix.GameInstaller do
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
 
   @topic "game_status"
+  # @sdl_api "https://api.legendary.gl/v1/sdl/#{Fortnite}.json"
 
   # execute actions and get state
   def install_game(app_name, opts),
