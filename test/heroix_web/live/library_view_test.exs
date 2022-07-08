@@ -119,28 +119,33 @@ defmodule HeroixWeb.LibraryViewTest do
     test "starts installing a game", %{conn: conn} do
       {:ok, view, _html} = live(conn, "/library/0afb9d54dd3743a582b48b506466d3f8")
 
+      view |> element("button", "Add Game") |> render_click()
       view |> element("button", "Install") |> render_click()
 
       assert Heroix.GameInstaller.installing() == "0afb9d54dd3743a582b48b506466d3f8"
     end
 
     test "adds a game to the install queue", %{conn: conn} do
-      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec")
+      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec", %{})
 
       assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
 
       {:ok, view, _html} = live(conn, "/library/0afb9d54dd3743a582b48b506466d3f8")
 
+      view |> element("button", "Add Game") |> render_click()
       view |> element("button", "Install") |> render_click()
 
       assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
-      assert Heroix.GameInstaller.queue() == ["0afb9d54dd3743a582b48b506466d3f8"]
+
+      assert Heroix.GameInstaller.queue() == [
+               %{app_name: "0afb9d54dd3743a582b48b506466d3f8", opts: %{"install_path" => nil}}
+             ]
     end
   end
 
   describe "stop installation button" do
     test "cancels the installation", %{conn: conn} do
-      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec")
+      Heroix.GameInstaller.install_game("0a697c1235fb4706a635cfa33f0306ec", %{})
 
       assert Heroix.GameInstaller.installing() == "0a697c1235fb4706a635cfa33f0306ec"
       assert Heroix.GameInstaller.queue() == []
@@ -151,9 +156,7 @@ defmodule HeroixWeb.LibraryViewTest do
 
       view |> element("button", "Stop Installation") |> render_click()
 
-      assert :sys.get_state(GameInstaller).stopping == "0a697c1235fb4706a635cfa33f0306ec"
-
-      assert view |> element("button", "Install") |> has_element?()
+      assert :sys.get_state(GameInstaller).stopping() == "0a697c1235fb4706a635cfa33f0306ec"
     end
   end
 
