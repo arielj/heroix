@@ -38,41 +38,39 @@ defmodule HeroixWeb.GameConfigComponent do
      assign(socket,
        app_name: assigns.app_name,
        default: Settings.legendary_game_config(:default),
-       config: Settings.legendary_game_config(assigns.app_name)
+       config: Settings.legendary_game_config(assigns.app_name),
+       new_env_name: "",
+       new_env_value: ""
      )}
   end
 
   def render(assigns) do
+    {os_type, os_name} = :os.type()
+
     ~H"""
     <div id="game-config">
+      <button id="close-config" phx-click="toggle-config">Close</button>
       <h2>Game Configuration</h2>
-      <form phx-change="config-changed" phx-target={@myself}>
-        <.config_text_field
-          label={gettext("Game Language")}
-          hint="Note that some games may not supports setting the specified language from outside the game."
-          key="language"
-          value={@config["language"]}
-          default={@default["language"] || "System Language"}
-          target={@myself}
-        />
+      <form class="settings-form" phx-change="config-changed" phx-target={@myself}>
+        <%= if os_type == :unix && os_name != :darwin do %>
+          <.config_text_field
+            label={gettext("Wine Executable")}
+            hint="Absolute path to the Wine executable that will be used to launch the game."
+            key="wine_executable"
+            value={@config["wine_executable"]}
+            default={@default["wine_executable"] || "The `wine` command"}
+            target={@myself}
+          />
 
-        <.config_text_field
-          label={gettext("Wine Executable")}
-          hint="Absolute path to the Wine executable that will be used to launch the game."
-          key="wine_executable"
-          value={@config["wine_executable"]}
-          default={@default["wine_executable"] || "The `wine` command"}
-          target={@myself}
-        />
-
-        <.config_text_field
-          label={gettext("Wine Prefix")}
-          hint="Absolute path to the WinePrefix folder that will be used to launch the game."
-          key="wine_prefix"
-          value={@config["wine_prefix"]}
-          default={@default["wine_prefix"] || "No Wine Prefix"}
-          target={@myself}
-        />
+          <.config_text_field
+            label={gettext("Wine Prefix")}
+            hint="Absolute path to the WinePrefix folder that will be used to launch the game."
+            key="wine_prefix"
+            value={@config["wine_prefix"]}
+            default={@default["wine_prefix"] || "No Wine Prefix"}
+            target={@myself}
+          />
+        <% end %>
 
         <.config_text_field
           label={gettext("Wrapper Executable")}
@@ -126,23 +124,63 @@ defmodule HeroixWeb.GameConfigComponent do
           default={@default["offline"] || "No"}
         />
 
-        <.config_text_field
-          label={gettext("Crossover App Path")}
-          hint="Path to Crossover (only needed on MacOS)."
-          key="crossover_app"
-          value={@config["crossover_app"]}
-          default={@default["crossover_app"] || "No Crossover App"}
-          target={@myself}
-        />
+        <%= if os_name == :darwin do %>
+          <.config_text_field
+            label={gettext("Crossover App Path")}
+            hint="Path to Crossover (only needed on MacOS)."
+            key="crossover_app"
+            value={@config["crossover_app"]}
+            default={@default["crossover_app"] || "No Crossover App"}
+            target={@myself}
+          />
 
+          <.config_text_field
+            label={gettext("Crossover Bottle Name")}
+            hint="Name of the Crossover Bottle (i.e.: Legendary). Only needed on MacOS."
+            key="crossover_bottle"
+            value={@config["crossover_bottle"]}
+            default={@default["crossover_bottle"] || "Legendary"}
+            target={@myself}
+          />
+
+          <% end %>
         <.config_text_field
-          label={gettext("Crossover Bottle Name")}
-          hint="Name of the Crossover Bottle (i.e.: Legendary). Only needed on MacOS."
-          key="crossover_bottle"
-          value={@config["crossover_bottle"]}
-          default={@default["crossover_bottle"] || "Legendary"}
+          label={gettext("Game Language")}
+          hint="Note that some games may not supports setting the specified language from outside the game."
+          key="language"
+          value={@config["language"]}
+          default={@default["language"] || "System Language"}
           target={@myself}
         />
+      </form>
+
+      <form class="env-variables" phx-change="new-env-changed" phx-target={@myself} phx-submit="add-new-env">
+        <label>Environment Variables</label>
+        <table>
+          <thead>
+            <tr>
+              <th>NAME</th>
+              <th>VALUE</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for {name, value} <- (@config["env"] || %{}) do %>
+              <tr>
+                <td><span><%= name %></span></td>
+                <td><span><%= value %></span></td>
+                <td><button type="button" phx-click="remove-env" value={name} phx-target={@myself}>-</button></td>
+              </tr>
+            <% end %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td><input type="text" name="new_env_name" value={@new_env_name} /></td>
+              <td><input type="text" name="new_env_value" value={@new_env_value} /></td>
+              <td><button type="submit">+</button></td>
+            </tr>
+          </tfoot>
+        </table>
       </form>
     </div>
     """
@@ -156,6 +194,28 @@ defmodule HeroixWeb.GameConfigComponent do
 
     config =
       Settings.set_legendary_game_config(app_name, key, value, Enum.member?(@save_on_change, key))
+
+    {:noreply, assign(socket, :config, config)}
+  end
+
+  def handle_event("new-env-changed", data, socket) do
+    %{"new_env_name" => new_name, "new_env_value" => new_value} = data
+
+    {:noreply, assign(socket, new_env_name: new_name, new_env_value: new_value)}
+  end
+
+  def handle_event("add-new-env", %{}, socket) do
+    %{new_env_name: var_name, new_env_value: var_value, app_name: app_name} = socket.assigns
+
+    config = Settings.set_legendary_game_env(app_name, var_name, var_value, true)
+
+    {:noreply, assign(socket, config: config, new_env_name: "", new_env_value: "")}
+  end
+
+  def handle_event("remove-env", %{"value" => var_name}, socket) do
+    %{app_name: app_name} = socket.assigns
+
+    config = Settings.delete_legendary_game_env(app_name, var_name, true)
 
     {:noreply, assign(socket, :config, config)}
   end

@@ -50,6 +50,7 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Install dialog (with customizable base path)
 - Login (using SID)
 - Resume installation (show correct progress calculating previously downloaded files)
+- Handle ENV variables to game's config
 
 ## WIP
 
@@ -63,7 +64,6 @@ Using https://www.icofont.com/icons, use the `FontIconComponent` component in he
 - Selective downloads
 - Anticheat status
 - Show error when trying to install a DLC without the main game
-- Handle ENV variables to game's config
 - Handle default game's config and default game's ENV variables
 - Import
 - Update (dialog with details)

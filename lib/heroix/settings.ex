@@ -18,6 +18,10 @@ defmodule Heroix.Settings do
     GenServer.call(Settings, {:set_legendary_game_config, app_name, {"env", key}, value, save})
   end
 
+  def delete_legendary_game_env(app_name, key, save) do
+    GenServer.call(Settings, {:delete_legendary_game_config, app_name, {"env", key}, save})
+  end
+
   def set_legendary_config(key, value, save) do
     GenServer.call(Settings, {:set_legendary_config, key, value, save})
   end
@@ -90,6 +94,36 @@ defmodule Heroix.Settings do
 
         _ ->
           Map.put(app_config, key, value)
+      end
+
+    new_legendary_config = Map.put(legendary_config, app_name, new_app_config)
+    new_state = Map.put(state, :legendary, new_legendary_config)
+
+    if save do
+      Heroix.Legendary.write_config(new_legendary_config)
+
+      HeroixWeb.Endpoint.broadcast!("settings", "legendary_game_settings_stored", %{
+        app_name: app_name,
+        new_settings: new_legendary_config
+      })
+    end
+
+    {:reply, new_app_config, new_state}
+  end
+
+  def handle_call({:delete_legendary_game_config, app_name, key, save}, _from, state) do
+    %{legendary: legendary_config} = state
+    app_config = legendary_config[app_name] || %{}
+
+    new_app_config =
+      case key do
+        {"env", config_key} ->
+          env = app_config["env"] || %{}
+          new_env = Map.delete(env, config_key)
+          Map.put(app_config, "env", new_env)
+
+        _ ->
+          Map.delete(app_config, key)
       end
 
     new_legendary_config = Map.put(legendary_config, app_name, new_app_config)

@@ -32,13 +32,13 @@ defmodule HeroixWeb.LibraryViewTest do
     assert html =~ games[:stranger]
     assert html =~ games[:batman]
 
-    html = view |> element("[id='search_form']") |> render_change(%{search: "sh"})
+    html = view |> element("#search_form") |> render_change(%{search: "sh"})
     refute html =~ games[:alan_wake]
     assert html =~ games[:sherlock]
     refute html =~ games[:stranger]
     refute html =~ games[:batman]
 
-    html = view |> element("[id='search_form']") |> render_change(%{search: ""})
+    html = view |> element("#search_form .input-field button") |> render_click()
     assert html =~ games[:alan_wake]
     assert html =~ games[:sherlock]
     assert html =~ games[:stranger]

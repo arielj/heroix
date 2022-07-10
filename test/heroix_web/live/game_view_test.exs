@@ -85,14 +85,14 @@ defmodule HeroixWeb.GameViewTest do
       assert Settings.legendary_game_config("Condor")["language"] == nil
 
       view
-      |> element("#game-config form")
+      |> element("#game-config .settings-form")
       |> render_change(%{"_target" => ["language"], "language" => "en"})
 
       assert Settings.legendary_game_config("Condor")["language"] == "en"
 
       # write to file on blur
       view
-      |> element("#game-config input[name=\"language\"]")
+      |> element("#game-config .settings-form input[name=\"language\"]")
       |> render_blur()
 
       assert_received %Phoenix.Socket.Broadcast{event: "save_legendary_config"}

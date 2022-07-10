@@ -113,7 +113,7 @@ defmodule HeroixWeb.GameView do
                 </p>
               <% end %>
             <% end %>
-            <button phx-click="uninstall">
+            <button phx-click="uninstall" data-confirm="Are you sure?">
               <.font_icon icon="database-remove" />
               Uninstall
             </button>
@@ -128,7 +128,7 @@ defmodule HeroixWeb.GameView do
               <% else %>
                 Starting installation...
               <% end %>
-              <button phx-click="stop-installation">
+              <button phx-click="stop-installation" data-confirm="Are you sure?">
                 <.font_icon icon="stop" />
                 Stop Installation
               </button>

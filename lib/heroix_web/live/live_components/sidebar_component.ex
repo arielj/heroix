@@ -12,7 +12,7 @@ defmodule HeroixWeb.SidebarComponent do
           <.font_icon icon="user" /> <%= @current_user %>
         <% end  %>
         <%= link to: "/library" do %>
-          <.font_icon icon="library" /> <%= gettext("Library") %>
+          <.font_icon icon="table" /> <%= gettext("Library") %>
         <% end  %>
       <% else %>
         <%= link to: "/login" do %>
