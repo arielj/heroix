@@ -30,7 +30,7 @@ defmodule HeroixWeb.DownloadsView do
         <div class="download current">
           <label><%= @games_info[@installing]["app_title"] %></label>
           <img src={"/image/#{@installing}/wide"} class="cover" />
-          <span>Progress: <%= @installation_progress %>%</span>
+          <span>Progress: <%= @installation_progress %></span>
           <span>ETA: <%= @installation_eta %></span>
           <button phx-click="stop">Stop</button>
         </div>
@@ -80,7 +80,7 @@ defmodule HeroixWeb.DownloadsView do
   end
 
   def handle_info(%{event: "installation_progress", payload: payload}, socket) do
-    %{percent: percent, eta: eta} = payload
+    %{progress: %{percent: percent, eta: eta}} = payload
 
     {:noreply, assign(socket, installation_progress: percent, installation_eta: eta)}
   end

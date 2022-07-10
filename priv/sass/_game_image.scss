@@ -10,12 +10,14 @@
 
     &.cover {
       width: 100%;
-      aspect-ratio: 1 / 1.5;
+      aspect-ratio: 222 / 125;
       object-fit: cover;
+      object-position: center center;
     }
 
     &.logo {
-      width: 60%;
+      max-height: 50%;
+      max-width: 40%;
     }
   }
 }

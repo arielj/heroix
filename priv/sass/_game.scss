@@ -1,6 +1,6 @@
 #game {
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: 300px 1fr;
   column-gap: 2rem;
   position: relative;
   overflow-x: hidden;
@@ -20,7 +20,7 @@
       flex-direction: column;
       gap: 0.5rem;
       button {
-        font-size: 2rem;
+        font-size: 1.5rem;
         cursor: pointer;
       }
     }

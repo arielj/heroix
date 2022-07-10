@@ -69,17 +69,19 @@ defmodule HeroixWeb.GameViewTest do
   end
 
   describe "settings" do
-    test "shows games settings", %{conn: conn} do
+    test "changes game's settings", %{conn: conn} do
       HeroixWeb.Endpoint.subscribe("settings")
 
       {:ok, view, _html} = live(conn, "/library/Condor")
 
+      # show config sidebar
       refute view |> element("#game.show-config") |> has_element?()
 
       view |> element("button", "Config") |> render_click()
 
       assert view |> element("#game.show-config") |> has_element?()
 
+      # change some setting
       assert Settings.legendary_game_config("Condor")["language"] == nil
 
       view
@@ -88,6 +90,7 @@ defmodule HeroixWeb.GameViewTest do
 
       assert Settings.legendary_game_config("Condor")["language"] == "en"
 
+      # write to file on blur
       view
       |> element("#game-config input[name=\"language\"]")
       |> render_blur()

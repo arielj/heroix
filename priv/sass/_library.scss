@@ -19,7 +19,7 @@
   }
   #games_list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     grid-template-rows: min-content min-content;
     grid-gap: 1rem;
     padding: 0px;

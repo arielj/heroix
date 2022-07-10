@@ -6,7 +6,7 @@ defmodule HeroixWeb.GameImageComponent do
 
     ~H"""
     <div class="game_image">
-      <img src={"/image/#{app_name}/tall"} class="cover" />
+      <img src={"/image/#{app_name}/wide"} class="cover" />
       <%= if has_logo?(@game) do %>
         <img src={"/image/#{app_name}/logo"} class="logo" />
       <% end %>

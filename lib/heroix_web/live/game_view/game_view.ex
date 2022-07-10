@@ -31,7 +31,7 @@ defmodule HeroixWeb.GameView do
        page_title: game_info["app_title"],
        game_running: GameRunner.running_game(),
        installing: GameInstaller.installing(),
-       install_queue: GameInstaller.queue(),
+       install_queue: GameInstaller.queue() |> Enum.map(fn x -> x.app_name end),
        install_progress: nil,
        install_eta: nil,
        install_downloaded: nil,

@@ -19,6 +19,7 @@ defmodule Heroix.ImagesCache do
   end
 
   defp size_query_string("logo"), do: "?h=50&resize=1&w=100"
+  defp size_query_string("wide"), do: "?h=250&resize=1&w=400"
   defp size_query_string(_), do: "?h=300&resize=1&w=200"
 
   defp download(url, to) do
