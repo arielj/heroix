@@ -95,7 +95,14 @@ defmodule Heroix.Settings do
     new_legendary_config = Map.put(legendary_config, app_name, new_app_config)
     new_state = Map.put(state, :legendary, new_legendary_config)
 
-    if save, do: Heroix.Legendary.write_config(new_legendary_config)
+    if save do
+      Heroix.Legendary.write_config(new_legendary_config)
+
+      HeroixWeb.Endpoint.broadcast!("settings", "legendary_game_settings_stored", %{
+        app_name: app_name,
+        new_settings: new_legendary_config
+      })
+    end
 
     {:reply, new_app_config, new_state}
   end
@@ -118,7 +125,13 @@ defmodule Heroix.Settings do
     new_legendary = Map.put(legendary_config, "Legendary", new_legendary_config)
     new_state = Map.put(state, :legendary, new_legendary)
 
-    if save, do: Legendary.write_config(new_legendary)
+    if save do
+      Legendary.write_config(new_legendary)
+
+      HeroixWeb.Endpoint.broadcast!("settings", "legendary_settings_stored", %{
+        new_settings: new_legendary
+      })
+    end
 
     {:reply, new_legendary_config, new_state}
   end
@@ -131,6 +144,10 @@ defmodule Heroix.Settings do
 
   def handle_cast(:save_legendary_config, state = %{legendary: legendary_config}) do
     Heroix.Legendary.write_config(legendary_config)
+
+    HeroixWeb.Endpoint.broadcast!("settings", "save_legendary_config", %{
+      new_settings: legendary_config
+    })
 
     {:noreply, state}
   end

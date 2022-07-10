@@ -1,5 +1,6 @@
 defmodule Heroix.Legendary do
   @binary Application.fetch_env!(:heroix, :legendary_bin_wrapper)
+  @file_manager Application.fetch_env!(:heroix, :file_manager)
 
   def owned_games do
     installed_info = installed_games()
@@ -46,8 +47,8 @@ defmodule Heroix.Legendary do
     end
   end
 
-  def read_config do
-    case File.read(config_ini_path()) do
+  def read_config() do
+    case @file_manager.read(config_ini_path()) do
       {:ok, body} ->
         lines = String.split(body, "\n")
         process_first_line(lines, %{})
@@ -161,7 +162,7 @@ defmodule Heroix.Legendary do
       |> Enum.reject(fn x -> is_nil(x) end)
       |> Enum.join("\n\n")
 
-    File.write(config_ini_path(), content <> "\n")
+    @file_manager.write(config_ini_path(), content <> "\n")
   end
 
   defp config_to_string(config, parent_key) do

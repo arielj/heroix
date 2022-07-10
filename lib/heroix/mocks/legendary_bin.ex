@@ -1,4 +1,4 @@
-defmodule Heroix.MockedLegendaryBin do
+defmodule Heroix.Mocks.LegendaryBin do
   use HeroixLog, "MockedBin"
 
   def install(app_name, opts \\ []) do

@@ -37,6 +37,14 @@
         .game_image {
           grid-area: image;
         }
+
+        &:not(.installed) {
+          filter: grayscale(0.9);
+
+          &:hover {
+            filter: grayscale(0);
+          }
+        }
       }
     }
   }

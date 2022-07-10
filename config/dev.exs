@@ -69,6 +69,7 @@ config :phoenix, :plug_init_mode, :runtime
 config :heroix, legendary_config_path: Path.join([System.user_home(), ".config", "legendary"])
 config :heroix, heroix_config_path: Path.join([System.user_home(), ".config", "heroix"])
 config :heroix, legendary_bin_wrapper: Heroix.LegendaryBin
+config :heroix, file_manager: File
 config :heroix, images_cache: Heroix.ImagesCache
 
 config :heroix, :phoenix_sass,

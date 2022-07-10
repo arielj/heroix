@@ -3,16 +3,11 @@ defmodule Heroix.LegendaryTest do
 
   alias Heroix.Legendary
 
-  @config_path Application.fetch_env!(:heroix, :legendary_config_path)
-  @config_ini Path.join([@config_path, "config.ini"])
-  @config_ini_sample Path.join([@config_path, "config.ini.sample"])
-
   @config_as_map %{
     "Legendary" => %{
       "log_level" => "debug",
       "max_memory" => "2048",
       "max_workers" => "8",
-      "install_dir" => "/mnt/tank/games",
       "locale" => "en-US",
       "egl_sync" => "false",
       "egl_programdata" => "/home/user/Games/epic-games-store/drive_c/...",
@@ -98,11 +93,7 @@ defmodule Heroix.LegendaryTest do
   end
 
   test "reads config.ini correctly" do
-    File.copy(@config_ini_sample, @config_ini)
-
     assert @config_as_map == Legendary.read_config()
-
-    File.rm(@config_ini)
   end
 
   test "writes config.ini properly" do
@@ -116,7 +107,6 @@ defmodule Heroix.LegendaryTest do
     disable_update_notice = false
     egl_programdata = /home/user/Games/epic-games-store/drive_c/...
     egl_sync = false
-    install_dir = /mnt/tank/games
     install_platform_fallback = true
     locale = en-US
     log_level = debug
@@ -163,13 +153,9 @@ defmodule Heroix.LegendaryTest do
     pre_launch_wait = false
     """
 
-    Legendary.write_config(@config_as_map)
+    {:ok, new_content} = Legendary.write_config(@config_as_map)
 
-    {:ok, body} = File.read(@config_ini)
-
-    assert body == config_content
-
-    File.rm(@config_ini)
+    assert new_content == config_content
   end
 
   test "ignores empty configurations" do
@@ -178,12 +164,9 @@ defmodule Heroix.LegendaryTest do
     wrapper = gamemode
     """
 
-    Legendary.write_config(%{"default" => %{"wrapper" => "gamemode", "wine" => ""}})
+    {:ok, new_content} =
+      Legendary.write_config(%{"default" => %{"wrapper" => "gamemode", "wine" => ""}})
 
-    {:ok, body} = File.read(@config_ini)
-
-    assert body == config_content
-
-    File.rm(@config_ini)
+    assert new_content == config_content
   end
 end
